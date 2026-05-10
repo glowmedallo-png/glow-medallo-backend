@@ -1,0 +1,13 @@
+const mongoose = require('mongoose');
+
+const ModeloSchema = new mongoose.Schema({
+    id: { type: Number, required: true, unique: true },
+    marcaId: { type: Number, required: true }, // Referencia a la marca
+    nombre: { type: String, required: true }, // ej: "A3"
+    categoria: { type: String, enum: ['PEQUEÑO', 'MEDIANO', 'SUV'], default: 'MEDIANO' },
+    activo: { type: Boolean, default: true }
+}, {
+    timestamps: true
+});
+
+module.exports = mongoose.model('Modelo', ModeloSchema);

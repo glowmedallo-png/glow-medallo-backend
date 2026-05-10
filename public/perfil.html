@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Glow Medallo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-wrap: wrap;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #ffd700; letter-spacing: 2px; }
+        .logo span { color: #fff; }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        .nav-links a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: #ffd700; }
+        button#logoutBtn {
+            background: none;
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .perfil-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #1a1a2e;
+            border-radius: 25px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        .perfil-container h2 { color: #ffd700; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; color: #ccc; margin-bottom: 0.5rem; }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a3e;
+            border: 1px solid #3a3a5e;
+            border-radius: 8px;
+            color: white;
+        }
+        button {
+            padding: 8px 16px;
+            background: #ffd700;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        .citas-lista {
+            margin-top: 2rem;
+            border-top: 1px solid #3a3a5e;
+            padding-top: 1rem;
+        }
+        .cita-card {
+            background: #2a2a3e;
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .cita-estado {
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .estado-pendiente { background: #ffc10720; color: #ffc107; border: 1px solid #ffc107; }
+        .estado-confirmada { background: #00c85320; color: #69f0ae; border: 1px solid #69f0ae; }
+        .estado-en_proceso { background: #2196f320; color: #64b5f6; border: 1px solid #64b5f6; }
+        .estado-completada { background: #4caf5020; color: #81c784; border: 1px solid #81c784; }
+        .estado-cancelada { background: #f4433620; color: #ff8a80; border: 1px solid #ff8a80; }
+        .tecnico-info {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: #ffd700;
+            background: #1a1a2e;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+        }
+        .botones-calificacion {
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn-calificar-tecnico, .btn-calificar-servicio, .btn-editar-tecnico, .btn-editar-servicio {
+            background: #ffd700;
+            color: #1a1a2e;
+        }
+        .btn-editar-tecnico, .btn-editar-servicio {
+            background: #2196f3;
+        }
+        .rating-stars {
+            color: #ffd700;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+        .mensaje { margin-top: 1rem; padding: 0.5rem; border-radius: 8px; }
+        .mensaje.success { background: #00c85320; color: #69f0ae; border: 1px solid #00c853; }
+        .mensaje.error { background: #ff444420; color: #ff8888; border: 1px solid #ff4444; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 20px;
+            min-width: 300px;
+            text-align: center;
+            border: 1px solid #ffd700;
+        }
+        .estrellas span {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #555;
+        }
+        .estrellas span.seleccionada { color: #ffd700; }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            background: #2a2a3e;
+            color: white;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid #3a3a5e;
+        }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,215,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+    <script src="/js/navbar.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html">Mi Perfil</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<div class="perfil-container">
+    <h2>👤 Mi Perfil</h2>
+    <div id="perfilInfo">Cargando datos...</div>
+    <div id="mensaje" class="mensaje" style="display:none;"></div>
+
+    <div class="citas-lista">
+        <h3>📋 Mis Citas</h3>
+        <div id="citasLista">Cargando citas...</div>
+    </div>
+</div>
+
+<footer class="footer">✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</footer>
+
+<!-- Modal para calificar/editar -->
+<div id="calificarModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitulo">⭐ Calificar</h3>
+        <div class="estrellas" id="estrellasSelector">
+            <span data-val="1">☆</span><span data-val="2">☆</span><span data-val="3">☆</span><span data-val="4">☆</span><span data-val="5">☆</span>
+        </div>
+        <textarea id="comentarioCal" rows="3" placeholder="Escribe un comentario (opcional)"></textarea>
+        <div style="margin-top: 1rem;">
+            <button id="enviarCalificacionBtn">Guardar calificación</button>
+            <button id="cancelarCalModal">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/api';
+    let token = localStorage.getItem('token');
+    let citaActualId = null;
+    let tipoCalificacion = null; // 'tecnico' o 'servicio'
+    let estrellasSeleccionadas = 0;
+
+    async function verificarSesion() {
+        if (!token) { window.location.href = '/login.html'; return false; }
+        return true;
+    }
+
+    async function cargarPerfil() {
+        try {
+            const res = await fetch(`${API_URL}/perfil`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('perfilInfo').innerHTML = `
+                    <div class="form-group"><label>Nombre</label><input type="text" id="nombre" value="${escapeHtml(data.cliente.nombre)}"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="email" value="${escapeHtml(data.cliente.email)}" disabled></div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" value="${escapeHtml(data.cliente.telefono || '')}"></div>
+                    <div class="form-group"><label>Nueva contraseña (dejar vacío para no cambiar)</label><input type="password" id="password" placeholder="Nueva contraseña"></div>
+                    <button onclick="guardarPerfil()">Guardar cambios</button>
+                `;
+            } else {
+                mostrarMensaje('Error al cargar perfil', 'error');
+            }
+        } catch (error) {
+            mostrarMensaje('Error de conexión', 'error');
+        }
+    }
+
+    async function guardarPerfil() {
+        const nombre = document.getElementById('nombre').value;
+        const telefono = document.getElementById('telefono').value;
+        const password = document.getElementById('password').value;
+        try {
+            const res = await fetch(`${API_URL}/clientes/actualizar`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ nombre, telefono, password: password || undefined })
+            });
+            const data = await res.json();
+            if (data.success) {
+                mostrarMensaje('Perfil actualizado', 'success');
+                const cliente = JSON.parse(localStorage.getItem('clienteLogueado') || '{}');
+                cliente.nombre = nombre;
+                cliente.telefono = telefono;
+                localStorage.setItem('clienteLogueado', JSON.stringify(cliente));
+            } else {
+                mostrarMensaje(data.error || 'Error', 'error');
+            }
+        } catch (error) {
+            mostrarMensaje('Error de conexión', 'error');
+        }
+    }
+
+    async function cargarCitas() {
+        try {
+            const res = await fetch(`${API_URL}/citas/mis-citas`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const citas = await res.json();
+            const container = document.getElementById('citasLista');
+            if (!citas.length) {
+                container.innerHTML = '<p>No tienes citas registradas.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            for (const c of citas) {
+                // Obtener nombre del técnico
+                let tecnicoNombre = 'No asignado';
+                if (c.id_tecnico) {
+                    try {
+                        const tecRes = await fetch(`${API_URL}/tecnicos/${c.id_tecnico}`);
+                        if (tecRes.ok) {
+                            const tecnico = await tecRes.json();
+                            tecnicoNombre = tecnico.nombre;
+                        }
+                    } catch (err) {}
+                }
+
+                // Obtener calificación existente de técnico y servicio (si las hay)
+                let califTecnico = null;
+                let califServicio = null;
+                if (c.estado === 'completada') {
+                    try {
+                        const tec = await fetch(`${API_URL}/calificacion-tecnico/${c._id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (tec.ok) califTecnico = await tec.json();
+                    } catch (err) {}
+                    try {
+                        const serv = await fetch(`${API_URL}/calificacion-servicio/${c._id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                        if (serv.ok) califServicio = await serv.json();
+                    } catch (err) {}
+                }
+
+                const estadoClass = `estado-${c.estado.replace('_', '-')}`;
+                const card = document.createElement('div');
+                card.className = 'cita-card';
+                let botonesHTML = '';
+                if (c.estado === 'completada') {
+                    // Técnico
+                    if (califTecnico && califTecnico.existe) {
+                        botonesHTML += `
+                            <div class="botones-calificacion">
+                                <span class="rating-stars">⭐ ${califTecnico.estrellas}/5</span>
+                                <button class="btn-editar-tecnico" data-id="${c._id}">✏️ Editar calificación técnico</button>
+                            </div>
+                        `;
+                    } else {
+                        botonesHTML += `
+                            <div class="botones-calificacion">
+                                <button class="btn-calificar-tecnico" data-id="${c._id}" ${!c.id_tecnico ? 'disabled' : ''}>⭐ Calificar técnico</button>
+                            </div>
+                        `;
+                    }
+                    // Servicio
+                    if (califServicio && califServicio.existe) {
+                        botonesHTML += `
+                            <div class="botones-calificacion">
+                                <span class="rating-stars">⭐ ${califServicio.estrellas}/5</span>
+                                <button class="btn-editar-servicio" data-id="${c._id}">✏️ Editar calificación servicio</button>
+                            </div>
+                        `;
+                    } else {
+                        botonesHTML += `
+                            <div class="botones-calificacion">
+                                <button class="btn-calificar-servicio" data-id="${c._id}">⭐ Calificar servicio</button>
+                            </div>
+                        `;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div><strong>📅 ${c.fechaCita}</strong> <span class="cita-estado ${estadoClass}">${c.estado}</span></div>
+                    <div>🚗 ${c.vehiculo.marca.toUpperCase()} ${c.vehiculo.modelo} (${c.vehiculo.ano})</div>
+                    <div>💰 $${c.total.toLocaleString('es-CO')} COP</div>
+                    <div>🔧 Técnico: <span class="tecnico-info">${tecnicoNombre}</span></div>
+                    ${botonesHTML}
+                `;
+                container.appendChild(card);
+            }
+
+            // Eventos para botones
+            document.querySelectorAll('.btn-calificar-tecnico').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    citaActualId = btn.getAttribute('data-id');
+                    tipoCalificacion = 'tecnico';
+                    document.getElementById('modalTitulo').innerText = '⭐ Calificar técnico';
+                    abrirModalCalificacion(null);
+                });
+            });
+            document.querySelectorAll('.btn-calificar-servicio').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    citaActualId = btn.getAttribute('data-id');
+                    tipoCalificacion = 'servicio';
+                    document.getElementById('modalTitulo').innerText = '⭐ Calificar servicio';
+                    abrirModalCalificacion(null);
+                });
+            });
+            document.querySelectorAll('.btn-editar-tecnico').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    citaActualId = btn.getAttribute('data-id');
+                    tipoCalificacion = 'tecnico';
+                    document.getElementById('modalTitulo').innerText = '✏️ Editar calificación técnico';
+                    const res = await fetch(`${API_URL}/calificacion-tecnico/${citaActualId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.existe) {
+                            abrirModalCalificacion({ estrellas: data.estrellas, comentario: data.comentario });
+                        } else {
+                            abrirModalCalificacion(null);
+                        }
+                    } else {
+                        abrirModalCalificacion(null);
+                    }
+                });
+            });
+            document.querySelectorAll('.btn-editar-servicio').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    citaActualId = btn.getAttribute('data-id');
+                    tipoCalificacion = 'servicio';
+                    document.getElementById('modalTitulo').innerText = '✏️ Editar calificación servicio';
+                    const res = await fetch(`${API_URL}/calificacion-servicio/${citaActualId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.existe) {
+                            abrirModalCalificacion({ estrellas: data.estrellas, comentario: data.comentario });
+                        } else {
+                            abrirModalCalificacion(null);
+                        }
+                    } else {
+                        abrirModalCalificacion(null);
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+            document.getElementById('citasLista').innerHTML = '<p>Error al cargar citas</p>';
+        }
+    }
+
+    function abrirModalCalificacion(existing) {
+        const modal = document.getElementById('calificarModal');
+        modal.style.display = 'flex';
+        // Reset estrellas
+        const spans = document.querySelectorAll('#estrellasSelector span');
+        spans.forEach((s, idx) => {
+            s.classList.remove('seleccionada');
+            s.innerHTML = '☆';
+        });
+        document.getElementById('comentarioCal').value = '';
+        estrellasSeleccionadas = 0;
+
+        if (existing) {
+            // Prellenar estrellas
+            for (let i = 0; i < existing.estrellas; i++) {
+                spans[i].classList.add('seleccionada');
+                spans[i].innerHTML = '★';
+            }
+            estrellasSeleccionadas = existing.estrellas;
+            document.getElementById('comentarioCal').value = existing.comentario || '';
+        }
+    }
+
+    document.getElementById('estrellasSelector')?.addEventListener('click', (e) => {
+        if (e.target && e.target.matches('span')) {
+            const val = parseInt(e.target.dataset.val);
+            estrellasSeleccionadas = val;
+            const spans = document.querySelectorAll('#estrellasSelector span');
+            spans.forEach((span, idx) => {
+                if (idx < val) {
+                    span.classList.add('seleccionada');
+                    span.innerHTML = '★';
+                } else {
+                    span.classList.remove('seleccionada');
+                    span.innerHTML = '☆';
+                }
+            });
+        }
+    });
+
+    document.getElementById('enviarCalificacionBtn')?.addEventListener('click', async () => {
+        if (!estrellasSeleccionadas) {
+            alert('Selecciona una calificación de estrellas');
+            return;
+        }
+        const comentario = document.getElementById('comentarioCal').value;
+        const esEdicion = document.getElementById('modalTitulo').innerText.startsWith('✏️');
+        let url, method;
+        if (tipoCalificacion === 'tecnico') {
+            url = esEdicion ? `${API_URL}/calificar-cita/${citaActualId}` : `${API_URL}/calificar-cita`;
+            method = esEdicion ? 'PUT' : 'POST';
+        } else {
+            url = esEdicion ? `${API_URL}/calificar-servicio/${citaActualId}` : `${API_URL}/calificar-servicio`;
+            method = esEdicion ? 'PUT' : 'POST';
+        }
+        const body = {
+            estrellas: estrellasSeleccionadas,
+            comentario: comentario
+        };
+        if (!esEdicion) body.id_cita = citaActualId;
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(esEdicion ? 'Calificación actualizada' : '¡Gracias por tu calificación!');
+                cerrarModalCalificacion();
+                cargarCitas(); // recargar para actualizar botones y estrellas
+            } else {
+                alert('Error: ' + (data.error || 'No se pudo guardar'));
+            }
+        } catch (error) {
+            alert('Error de conexión');
+        }
+    });
+
+    document.getElementById('cancelarCalModal')?.addEventListener('click', cerrarModalCalificacion);
+    function cerrarModalCalificacion() {
+        document.getElementById('calificarModal').style.display = 'none';
+    }
+
+    function mostrarMensaje(texto, tipo) {
+        const div = document.getElementById('mensaje');
+        div.textContent = texto;
+        div.className = `mensaje ${tipo}`;
+        div.style.display = 'block';
+        setTimeout(() => div.style.display = 'none', 4000);
+    }
+
+    function escapeHtml(str) { 
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+
+    (async function() {
+        if (!await verificarSesion()) return;
+        await cargarPerfil();
+        await cargarCitas();
+    })();
+</script>
+</body>
+</html>

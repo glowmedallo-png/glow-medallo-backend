@@ -1,0 +1,15 @@
+const mongoose = require('mongoose');
+
+const TecnicoSchema = new mongoose.Schema({
+    id: { type: Number, required: true, unique: true },
+    nombre: { type: String, required: true },
+    foto: { type: String, default: '' },
+    especialidad: { type: String, required: true },
+    experiencia: { type: Number, required: true },
+    certificaciones: [String],
+    activo: { type: Boolean, default: true }
+}, {
+    timestamps: true
+});
+
+module.exports = mongoose.model('Tecnico', TecnicoSchema);

@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Glow Medallo - Cotización Detailing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #ffd700; letter-spacing: 2px; }
+        .logo span { color: #fff; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; flex-wrap: wrap; }
+        .nav-links a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: #ffd700; }
+        button#logoutBtn { background: none; border: 1px solid #ff4444; color: #ff8888; padding: 5px 12px; border-radius: 20px; cursor: pointer; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .main-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; }
+        .vehicle-card, .services-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 25px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,215,0,0.1);
+        }
+        .vehicle-card { height: fit-content; position: sticky; top: 20px; }
+        .selector-title { text-align: center; color: #ffd700; font-size: 1.3rem; margin-bottom: 0.5rem; text-transform: uppercase; }
+        .selector-subtitle { text-align: center; color: #888; font-size: 0.75rem; margin-bottom: 1.5rem; }
+        .vehicle-showcase { position: relative; background: #0f0f1a; border-radius: 18px; padding: 1rem; margin-bottom: 1.5rem; border: 1px solid #ffd70033; }
+        .showcase-image { width: 100%; height: auto; border-radius: 12px; }
+        .vehicle-badge { position: absolute; bottom: 20px; right: 20px; background: rgba(0,0,0,0.85); color: #ffd700; padding: 0.4rem 1rem; border-radius: 30px; font-size: 0.7rem; font-weight: bold; }
+        .image-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%); border-radius: 12px; color: #666; }
+        .selector-form { display: flex; flex-direction: column; gap: 1rem; }
+        .input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .input-group label { color: #e0e0e0; font-weight: 600; font-size: 0.8rem; }
+        .selector-input { padding: 12px 14px; background: #2a2a3e; border: 1.5px solid #3a3a5e; border-radius: 12px; color: white; font-size: 0.9rem; cursor: pointer; }
+        .selector-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .services-list { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; max-height: 350px; overflow-y: auto; scrollbar-width: thin; }
+        .services-list::-webkit-scrollbar { width: 5px; }
+        .services-list::-webkit-scrollbar-track { background: #2a2a3e; border-radius: 10px; }
+        .services-list::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 10px; }
+        .service-item { background: #2a2a3e; border-radius: 12px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border: 1.5px solid transparent; }
+        .service-item.selected { border-color: #ffd700; background: #3a3a5e; }
+        .service-info { flex: 1; }
+        .service-name { color: #ffd700; font-weight: bold; }
+        .service-desc { color: #aaa; font-size: 0.7rem; margin-top: 4px; }
+        .service-price { color: #69f0ae; font-weight: bold; text-align: right; }
+        .service-check { width: 24px; height: 24px; background: #1a1a2e; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 1rem; color: #ffd700; }
+        .service-item.selected .service-check { background: #ffd700; color: #1a1a2e; }
+        .resumen-container { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #3a3a5e; }
+        .resumen-list { max-height: 200px; overflow-y: auto; }
+        .resumen-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #3a3a5e; color: #ddd; }
+        .resumen-total { display: flex; justify-content: space-between; padding-top: 0.8rem; font-weight: bold; color: #ffd700; border-top: 2px solid #ffd700; }
+        .cotizar-btn, .agendar-btn { width: 100%; padding: 12px; background: linear-gradient(135deg,#ffd700 0%,#ffb347 100%); border: none; border-radius: 40px; font-weight: bold; cursor: pointer; margin-top: 1rem; }
+        .agendar-btn { background: linear-gradient(135deg,#00c853 0%,#00e676 100%); }
+        .cotizar-btn:disabled, .agendar-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a2e; padding: 2rem; border-radius: 20px; max-width: 400px; width: 90%; border: 1px solid #ffd700; }
+        .modal-input { width: 100%; padding: 12px; background: #2a2a3e; border: 1px solid #3a3a5e; border-radius: 10px; color: white; margin: 0.5rem 0; }
+        .modal-buttons { display: flex; gap: 1rem; margin-top: 1rem; }
+        .modal-btn { flex: 1; padding: 10px; border: none; border-radius: 10px; cursor: pointer; }
+        .modal-btn.confirm { background: #ffd700; color: #1a1a2e; }
+        .modal-btn.cancel { background: #3a3a5e; color: white; }
+        .success-message { margin-top: 1rem; padding: 0.7rem; background: rgba(0,200,83,0.15); border: 1px solid #00c853; border-radius: 12px; color: #69f0ae; text-align: center; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .loading-spinner { width: 60px; height: 60px; border: 4px solid #2a2a3e; border-top: 4px solid #ffd700; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-overlay p { color: #ffd700; margin-top: 1rem; }
+        #categoriaContainer { margin-top: 0.5rem; }
+        .categoria-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; width: 100%; text-align: center; }
+        .categoria-pequeno { background: #00c85320; color: #69f0ae; border: 1px solid #69f0ae; }
+        .categoria-mediano { background: #ffd70020; color: #ffd700; border: 1px solid #ffd700; }
+        .categoria-suv { background: #ff444420; color: #ff8888; border: 1px solid #ff8888; }
+        #recomendacionContainer {
+            margin-top: 1rem;
+            background: #2a2a3e;
+            border-radius: 12px;
+            padding: 0.8rem;
+            display: none;
+            border-left: 4px solid #ffd700;
+            color: white;
+        }
+        #recomendacionContainer strong,
+        #recomendacionContainer small {
+            color: white;
+        }
+        .horario-info { font-size: 0.75rem; color: #aaa; margin-top: 0.3rem; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .vehicle-card { position: static; } }
+        @media (max-width: 600px) { .service-item { flex-direction: column; text-align: center; } .service-check { margin-left: 0; margin-top: 8px; } }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,215,0,0.1);
+            color: white;
+        }
+    </style>
+    <script src="/js/navbar.js"></script>
+</head>
+<body>
+
+<!-- ========== NAVBAR ========== -->
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div class="main-grid">
+        <!-- Columna vehículo -->
+        <div class="vehicle-card">
+            <h2 class="selector-title">✨ GLOW MEDALLO ✨</h2>
+            <p class="selector-subtitle">Selecciona tu vehículo</p>
+            <div class="vehicle-showcase">
+                <div id="imageContainer" class="image-placeholder">
+                    <div style="font-size: 3rem;">🚗</div>
+                    <div>Selecciona un vehículo</div>
+                </div>
+                <div id="vehicleBadge" class="vehicle-badge" style="display: none;"></div>
+            </div>
+            <div class="selector-form">
+                <div class="input-group"><label>🚗 MARCA</label><select id="marca" class="selector-input"><option value="">Cargando marcas...</option></select></div>
+                <div class="input-group"><label>🔧 MODELO</label><select id="modelo" class="selector-input" disabled><option value="">Primero selecciona una marca</option></select></div>
+                <div class="input-group"><label>📅 AÑO</label><select id="ano" class="selector-input"><option value="">Selecciona el año</option></select></div>
+                <div class="input-group" id="categoriaContainer" style="display: none;">
+                    <label>🏷️ CATEGORÍA DEL VEHÍCULO</label>
+                    <div id="categoriaValor" class="selector-input" style="background: #3a3a5e; cursor: default;"><span id="categoriaTexto">-</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna servicios -->
+        <div class="services-card">
+            <h2 class="selector-title">🔧 SERVICIOS DE DETAILING</h2>
+            <p class="selector-subtitle">Selecciona los servicios</p>
+            <div id="servicesList" class="services-list"><div style="text-align:center;">Cargando servicios...</div></div>
+            <div id="resumenContainer" class="resumen-container" style="display: none;">
+                <div class="resumen-title">📋 RESUMEN DE COTIZACIÓN</div>
+                <div id="resumenList" class="resumen-list"></div>
+                <div id="resumenTotal" class="resumen-total">Total: $0</div>
+            </div>
+            <div id="recomendacionContainer">
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <span style="font-size: 1.5rem;">👨‍🔧</span>
+                    <div><strong>Técnico recomendado:</strong> <span id="recomendadoNombre">-</span><br><small id="recomendadoMatch">-</small></div>
+                </div>
+            </div>
+            <button id="cotizarBtn" class="cotizar-btn" disabled>📱 COTIZAR POR WHATSAPP</button>
+            <button id="agendarBtn" class="agendar-btn" disabled>📅 AGENDAR CITA</button>
+            <div id="successMessage" class="success-message" style="display: none;"></div>
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;"><div class="loading-spinner"></div><p>Procesando...</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal agendar cita -->
+<div id="citaModal" class="modal">
+    <div class="modal-content">
+        <h3>📅 Agendar Cita</h3>
+        <div id="camposCliente"></div>
+        <div class="input-group"><label>📅 Fecha</label><input type="date" id="citaFecha" class="modal-input"></div>
+        <div class="input-group"><label>⏰ Hora</label><select id="citaHora" class="modal-input"><option value="">Selecciona primero una fecha</option></select><div id="horarioInfo" class="horario-info"></div></div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" id="cancelarModalBtn">Cancelar</button>
+            <button class="modal-btn confirm" id="confirmarModalBtn" disabled>Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para datos de WhatsApp -->
+<div id="whatsappDataModal" class="modal">
+    <div class="modal-content">
+        <h3>📱 Cotizar por WhatsApp</h3>
+        <p>Para enviarte la cotización, necesitamos tus datos:</p>
+        <div class="input-group">
+            <label>👤 Nombre completo *</label>
+            <input type="text" id="whatsappNombre" class="modal-input" placeholder="Ej: Juan Pérez" required>
+        </div>
+        <div class="input-group">
+            <label>📧 Correo electrónico *</label>
+            <input type="email" id="whatsappEmail" class="modal-input" placeholder="Ej: juan@example.com" required>
+        </div>
+        <div class="input-group">
+            <label>📱 Teléfono (opcional)</label>
+            <input type="tel" id="whatsappTelefono" class="modal-input" placeholder="Ej: 3001234567">
+        </div>
+        <div class="modal-buttons">
+            <button class="modal-btn cancel" id="cancelWhatsappModal">Cancelar</button>
+            <button class="modal-btn confirm" id="confirmWhatsappModal">Enviar cotización</button>
+        </div>
+    </div>
+</div>
+<footer class="footer">✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</footer>
+
+<script>
+    const API_URL = '/api';
+    let enviandoCotizacion = false, agendandoCita = false;
+    let marcaSeleccionada = '';
+    let modeloIdSeleccionado = '';
+    let modeloNombre = '';
+    let modeloImagenUrl = '';
+    let anoSeleccionado = '';
+    let categoriaVehiculo = 'MEDIANO';
+    let serviciosDisponibles = [];
+    let serviciosAgregados = [];
+    let totalCotizacion = 0;
+    let tecnicoRecomendadoId = null;
+    const factorPrecio = { "PEQUEÑO": 1.0, "MEDIANO": 1.3, "SUV": 1.6 };
+    let horasDisponibles = [];
+
+    // Elementos DOM
+    const selectMarca = document.getElementById('marca');
+    const selectModelo = document.getElementById('modelo');
+    const selectAno = document.getElementById('ano');
+    const cotizarBtn = document.getElementById('cotizarBtn');
+    const agendarBtn = document.getElementById('agendarBtn');
+    const successMessage = document.getElementById('successMessage');
+    const servicesList = document.getElementById('servicesList');
+    const resumenContainer = document.getElementById('resumenContainer');
+    const resumenList = document.getElementById('resumenList');
+    const resumenTotal = document.getElementById('resumenTotal');
+    const imageContainer = document.getElementById('imageContainer');
+    const vehicleBadge = document.getElementById('vehicleBadge');
+    const citaModal = document.getElementById('citaModal');
+    const citaFecha = document.getElementById('citaFecha');
+    const citaHora = document.getElementById('citaHora');
+    const horarioInfo = document.getElementById('horarioInfo');
+    const confirmarBtn = document.getElementById('confirmarModalBtn');
+
+    // ========== LOADER ==========
+    function mostrarLoading(msg = 'Procesando...') {
+        const overlay = document.getElementById('loadingOverlay');
+        const p = overlay.querySelector('p');
+        if (p) p.textContent = msg;
+        overlay.style.display = 'flex';
+    }
+    function ocultarLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+
+    // ========== CARGAR MARCAS ==========
+    async function cargarMarcas() {
+        try {
+            const res = await fetch(`${API_URL}/marcas`);
+            const marcas = await res.json();
+            selectMarca.innerHTML = '<option value="">Selecciona la marca</option>';
+            marcas.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.nombre;
+                opt.textContent = m.nombreMostrar;
+                selectMarca.appendChild(opt);
+            });
+        } catch { selectMarca.innerHTML = '<option value="">Error</option>'; }
+    }
+
+    // ========== CARGAR MODELOS ==========
+    async function cargarModelos(marcaNombre) {
+        if (!marcaNombre) return;
+        try {
+            selectModelo.innerHTML = '<option value="">Cargando...</option>';
+            const res = await fetch(`${API_URL}/modelos/${marcaNombre}`);
+            const modelos = await res.json();
+            selectModelo.innerHTML = '<option value="">Selecciona el modelo</option>';
+            if (modelos.length) {
+                selectModelo.disabled = false;
+                modelos.forEach(mod => {
+                    const opt = document.createElement('option');
+                    opt.value = mod._id;
+                    opt.textContent = mod.nombre;
+                    opt.dataset.imagen = mod.imagen || '';
+                    opt.dataset.categoria = mod.categoria || 'MEDIANO';
+                    selectModelo.appendChild(opt);
+                });
+            } else {
+                selectModelo.innerHTML = '<option value="">No hay modelos</option>';
+                selectModelo.disabled = true;
+            }
+        } catch (error) {
+            console.error(error);
+            selectModelo.innerHTML = '<option value="">Error</option>';
+        }
+    }
+
+    // ========== CARGAR SERVICIOS ==========
+    async function cargarServiciosBackend() {
+        try {
+            const res = await fetch(`${API_URL}/servicios`);
+            serviciosDisponibles = await res.json();
+            cargarServiciosFrontend();
+        } catch { servicesList.innerHTML = '<div>Error cargando servicios</div>'; }
+    }
+
+    // ========== AÑOS ==========
+    function cargarAnos() {
+        const actual = new Date().getFullYear();
+        for (let i = actual + 1; i >= 2000; i--) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = i;
+            selectAno.appendChild(opt);
+        }
+    }
+
+    // ========== MOSTRAR CATEGORÍA ==========
+    function mostrarCategoria(categoria) {
+        const cont = document.getElementById('categoriaContainer');
+        const span = document.getElementById('categoriaTexto');
+        cont.style.display = 'block';
+        let texto = '', clase = '';
+        if (categoria === 'PEQUEÑO') { texto = '🚗 PEQUEÑO'; clase = 'categoria-pequeno'; }
+        else if (categoria === 'MEDIANO') { texto = '🚙 MEDIANO'; clase = 'categoria-mediano'; }
+        else if (categoria === 'SUV') { texto = '🚙 SUV'; clase = 'categoria-suv'; }
+        span.innerHTML = `<span class="categoria-badge ${clase}">${texto}</span>`;
+    }
+
+    // ========== ACTUALIZAR CATEGORÍA Y PRECIOS ==========
+    function actualizarCategoriaVehiculo() {
+        if (categoriaVehiculo) {
+            mostrarCategoria(categoriaVehiculo);
+            if (serviciosAgregados.length) {
+                serviciosAgregados = serviciosAgregados.map(s => {
+                    const orig = serviciosDisponibles.find(x => x._id === s._id);
+                    return { ...s, precioFinal: Math.round(orig.precioBase * factorPrecio[categoriaVehiculo]) };
+                });
+                actualizarResumen();
+                cargarServiciosFrontend();
+            } else {
+                cargarServiciosFrontend();
+            }
+        }
+    }
+
+    // ========== MOSTRAR IMAGEN DEL MODELO ==========
+    function actualizarShowcase() {
+        if (modeloIdSeleccionado && modeloImagenUrl) {
+            imageContainer.innerHTML = `<img src="${modeloImagenUrl}" class="showcase-image" style="width:100%; border-radius:12px;" onerror="this.onerror=null; this.src='https://placehold.co/500x300/1a1a2e/ffd700?text=${encodeURIComponent(marcaSeleccionada.toUpperCase()+' '+modeloNombre)}'">`;
+        } else if (modeloIdSeleccionado && !modeloImagenUrl) {
+            imageContainer.innerHTML = `<div class="image-placeholder"><div style="font-size:3rem;">🚗</div><div>Imagen no disponible</div></div>`;
+        } else {
+            imageContainer.innerHTML = `<div class="image-placeholder"><div style="font-size:3rem;">🚗</div><div>Selecciona un vehículo</div></div>`;
+        }
+        if (modeloIdSeleccionado) {
+            const badgeText = `${marcaSeleccionada.toUpperCase()} ${modeloNombre}${anoSeleccionado ? ' - ' + anoSeleccionado : ''}`;
+            vehicleBadge.textContent = badgeText;
+            vehicleBadge.style.display = 'block';
+        } else {
+            vehicleBadge.style.display = 'none';
+        }
+    }
+
+    // ========== SERVICIOS ==========
+    function cargarServiciosFrontend() {
+        if (!serviciosDisponibles.length) return;
+        servicesList.innerHTML = '';
+        serviciosDisponibles.forEach(s => {
+            const precio = Math.round(s.precioBase * factorPrecio[categoriaVehiculo]);
+            const selec = serviciosAgregados.some(x => x._id === s._id);
+            const div = document.createElement('div');
+            div.className = `service-item ${selec ? 'selected' : ''}`;
+            div.setAttribute('data-id', s._id);
+            div.onclick = () => toggleServicio(s._id);
+            div.innerHTML = `
+                <div class="service-info">
+                    <div class="service-name">${s.nombre}</div>
+                    <div class="service-desc">${s.descripcion}</div>
+                </div>
+                <div class="service-price">$${precio.toLocaleString('es-CO')}<small>COP</small></div>
+                <div class="service-check">${selec ? '✓' : '○'}</div>
+            `;
+            servicesList.appendChild(div);
+        });
+    }
+
+    function toggleServicio(id) {
+        const servicio = serviciosDisponibles.find(s => s._id === id);
+        const idx = serviciosAgregados.findIndex(s => s._id === id);
+        if (idx === -1) {
+            const precio = Math.round(servicio.precioBase * factorPrecio[categoriaVehiculo]);
+            serviciosAgregados.push({
+                _id: servicio._id,
+                id: servicio.id,
+                nombre: servicio.nombre,
+                precioFinal: precio
+            });
+        } else {
+            serviciosAgregados.splice(idx, 1);
+        }
+        cargarServiciosFrontend();
+        actualizarResumen();
+        verificarEstado();
+        recomendarTecnico();
+    }
+
+    function actualizarResumen() {
+        if (!serviciosAgregados.length) {
+            resumenContainer.style.display = 'none';
+            totalCotizacion = 0;
+            return;
+        }
+        resumenContainer.style.display = 'block';
+        resumenList.innerHTML = '';
+        let total = 0;
+        serviciosAgregados.forEach(s => {
+            total += s.precioFinal;
+            resumenList.innerHTML += `<div class="resumen-item"><span>${s.nombre}</span><span>$${s.precioFinal.toLocaleString('es-CO')}</span></div>`;
+        });
+        totalCotizacion = total;
+        resumenTotal.innerHTML = `💰 TOTAL: $${total.toLocaleString('es-CO')} COP`;
+    }
+
+    function verificarEstado() {
+        const completo = marcaSeleccionada && modeloIdSeleccionado && anoSeleccionado && serviciosAgregados.length > 0;
+        cotizarBtn.disabled = !completo;
+        agendarBtn.disabled = !completo;
+        if (!marcaSeleccionada || !modeloIdSeleccionado || !anoSeleccionado)
+            successMessage.innerHTML = '⚠️ Completa los datos de tu vehículo';
+        else if (!serviciosAgregados.length)
+            successMessage.innerHTML = '⚠️ Selecciona al menos un servicio';
+        else
+            successMessage.innerHTML = `✅ ${marcaSeleccionada.toUpperCase()} ${modeloNombre} (${categoriaVehiculo}) | ${serviciosAgregados.length} servicio(s) | Total: $${totalCotizacion.toLocaleString('es-CO')}`;
+        successMessage.style.display = 'block';
+    }
+
+    // ========== RECOMENDAR TÉCNICO ==========
+    async function recomendarTecnico() {
+        if (serviciosAgregados.length === 0) {
+            document.getElementById('recomendacionContainer').style.display = 'none';
+            tecnicoRecomendadoId = null;
+            return;
+        }
+        const idsServicios = serviciosAgregados.map(s => s._id);
+        try {
+            const res = await fetch(`${API_URL}/recomendar-tecnico`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idsServicios })
+            });
+            const data = await res.json();
+            if (data.recomendado) {
+                tecnicoRecomendadoId = data.recomendado.id;
+                document.getElementById('recomendadoNombre').innerText = `${data.recomendado.nombre} (${data.recomendado.especialidad})`;
+                document.getElementById('recomendadoMatch').innerText = `Cubre ${data.recomendado.matchCount} de ${data.recomendado.totalSeleccionados} servicios`;
+                document.getElementById('recomendacionContainer').style.display = 'block';
+            } else {
+                tecnicoRecomendadoId = null;
+                document.getElementById('recomendacionContainer').style.display = 'none';
+            }
+        } catch (error) {
+            console.error(error);
+            tecnicoRecomendadoId = null;
+            document.getElementById('recomendacionContainer').style.display = 'none';
+        }
+    }
+
+    // ========== HORAS DISPONIBLES ==========
+    async function cargarHorasDisponibles() {
+        const fecha = citaFecha.value;
+        if (!fecha) {
+            citaHora.innerHTML = '<option value="">Primero selecciona una fecha</option>';
+            horarioInfo.innerText = '';
+            horasDisponibles = [];
+            confirmarBtn.disabled = true;
+            return;
+        }
+        if (!tecnicoRecomendadoId) {
+            horarioInfo.innerText = 'Selecciona servicios para asignar técnico';
+            citaHora.innerHTML = '<option value="">Sin técnico asignado</option>';
+            confirmarBtn.disabled = true;
+            return;
+        }
+        mostrarLoading('Cargando horarios...');
+        try {
+            const res = await fetch(`${API_URL}/horarios-disponibles?fecha=${fecha}&id_tecnico=${tecnicoRecomendadoId}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            horasDisponibles = data.disponibles;
+            if (data.mensaje) horarioInfo.innerText = data.mensaje;
+            else horarioInfo.innerText = `Horario: ${data.horario.inicio}:00 - ${data.horario.fin}:00 (horas disponibles cada 30 min)`;
+            citaHora.innerHTML = '<option value="">Selecciona una hora</option>';
+            if (horasDisponibles.length === 0) {
+                citaHora.innerHTML = '<option value="">No hay horas disponibles</option>';
+                confirmarBtn.disabled = true;
+            } else {
+                horasDisponibles.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h;
+                    opt.textContent = h;
+                    citaHora.appendChild(opt);
+                });
+                confirmarBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error(error);
+            horarioInfo.innerText = 'Error al cargar horarios';
+            citaHora.innerHTML = '<option value="">Error</option>';
+            confirmarBtn.disabled = true;
+        } finally {
+            ocultarLoading();
+        }
+    }
+
+    // ========== WHATSAPP ==========
+    function construirMensajeWhatsApp(nombre, email, telefono) {
+        let mensaje = `🏎️ *COTIZACIÓN GLOW MEDALLO* 🏎️%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A%0A`;
+        mensaje += `📋 *DATOS DEL CLIENTE*%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A`;
+        mensaje += `👤 *Nombre:* ${nombre}%0A📧 *Email:* ${email}%0A`;
+        if (telefono) mensaje += `📱 *Teléfono:* ${telefono}%0A`;
+        mensaje += `%0A🚗 *DATOS DEL VEHÍCULO*%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A`;
+        mensaje += `🔹 *Marca:* ${marcaSeleccionada.toUpperCase()}%0A🔹 *Modelo:* ${modeloNombre}%0A🔹 *Año:* ${anoSeleccionado}%0A🔹 *Categoría:* ${categoriaVehiculo === 'PEQUEÑO' ? '🚗 Pequeño' : categoriaVehiculo === 'SUV' ? '🚙 SUV' : '🚙 Mediano'}%0A%0A`;
+        mensaje += `🔧 *SERVICIOS SOLICITADOS*%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A`;
+        serviciosAgregados.forEach(s => {
+            mensaje += `✅ *${s.nombre}*%0A   💰 $${s.precioFinal.toLocaleString('es-CO')} COP%0A`;
+        });
+        mensaje += `%0A💰 *TOTAL COTIZACIÓN*%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A💵 *$${totalCotizacion.toLocaleString('es-CO')} COP*%0A%0A`;
+        mensaje += `✨ *GLOW MEDALLO - DETAILING DE EXCELENCIA* ✨%0A━━━━━━━━━━━━━━━━━━━━━━━━━━━%0A📍 *Dirección:* Calle 10 # 30 - 45, El Poblado%0A⏰ *Horarios:* Lunes a Sábado 8am - 6pm`;
+        return mensaje;
+    }
+
+    function enviarWhatsAppDirecto(nombre, email, telefono) {
+        enviandoCotizacion = true;
+        const originalText = cotizarBtn.innerHTML;
+        cotizarBtn.disabled = true;
+        cotizarBtn.innerHTML = '⏳ Enviando...';
+
+        const mensaje = construirMensajeWhatsApp(nombre, email, telefono);
+        const numeroWhatsApp = '573133701915';
+        window.open(`https://wa.me/${numeroWhatsApp}?text=${mensaje}`, '_blank');
+
+        setTimeout(() => {
+            cotizarBtn.disabled = false;
+            cotizarBtn.innerHTML = originalText;
+            enviandoCotizacion = false;
+        }, 1500);
+        successMessage.innerHTML = '✅ Redirigiendo a WhatsApp...';
+    }
+
+    function mostrarModalWhatsApp() {
+        const modal = document.getElementById('whatsappDataModal');
+        if (!modal) return;
+        const nombreInput = document.getElementById('whatsappNombre');
+        const emailInput = document.getElementById('whatsappEmail');
+        const telefonoInput = document.getElementById('whatsappTelefono');
+        if (nombreInput) nombreInput.value = '';
+        if (emailInput) emailInput.value = '';
+        if (telefonoInput) telefonoInput.value = '';
+
+        modal.style.display = 'flex';
+
+        const enviarDesdeModal = async () => {
+            const nombre = nombreInput ? nombreInput.value.trim() : '';
+            const email = emailInput ? emailInput.value.trim() : '';
+            if (!nombre || !email) {
+                alert('Por favor, ingresa tu nombre y correo electrónico');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                alert('Correo electrónico inválido');
+                return;
+            }
+            const telefono = telefonoInput ? telefonoInput.value.trim() : '';
+            modal.style.display = 'none';
+            enviarWhatsAppDirecto(nombre, email, telefono);
+            const confirmBtn = document.getElementById('confirmWhatsappModal');
+            const cancelBtn = document.getElementById('cancelWhatsappModal');
+            if (confirmBtn) confirmBtn.removeEventListener('click', enviarDesdeModal);
+            if (cancelBtn) cancelBtn.removeEventListener('click', cerrarModalWhatsApp);
+        };
+
+        function cerrarModalWhatsApp() {
+            modal.style.display = 'none';
+            const confirmBtn = document.getElementById('confirmWhatsappModal');
+            const cancelBtn = document.getElementById('cancelWhatsappModal');
+            if (confirmBtn) confirmBtn.removeEventListener('click', enviarDesdeModal);
+            if (cancelBtn) cancelBtn.removeEventListener('click', cerrarModalWhatsApp);
+        }
+
+        const confirmBtn = document.getElementById('confirmWhatsappModal');
+        const cancelBtn = document.getElementById('cancelWhatsappModal');
+        if (confirmBtn) confirmBtn.addEventListener('click', enviarDesdeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', cerrarModalWhatsApp);
+    }
+
+    function cotizarWhatsApp() {
+        if (enviandoCotizacion) return;
+        if (!marcaSeleccionada || !modeloIdSeleccionado || !anoSeleccionado || !serviciosAgregados.length) {
+            alert('Completa todos los datos del vehículo y selecciona al menos un servicio');
+            return;
+        }
+        const clienteLog = JSON.parse(localStorage.getItem('clienteLogueado') || 'null');
+        const token = localStorage.getItem('token');
+        if (clienteLog && token && clienteLog.nombre) {
+            enviarWhatsAppDirecto(clienteLog.nombre, clienteLog.email, clienteLog.telefono || '');
+        } else {
+            mostrarModalWhatsApp();
+        }
+    }
+
+    // ========== AGENDAR CITA (MEJORADO: bloquea domingos) ==========
+    function mostrarModalCita() {
+        const clienteLogueado = JSON.parse(localStorage.getItem('clienteLogueado') || 'null');
+        const token = localStorage.getItem('token');
+        const camposDiv = document.getElementById('camposCliente');
+        if (clienteLogueado && token) {
+            camposDiv.innerHTML = `<div style="background:#2a2a3e; padding:10px; border-radius:10px;"><p style="color:#69f0ae;">✅ Agendando como: <strong>${clienteLogueado.nombre}</strong></p><p style="color:#aaa;">📧 ${clienteLogueado.email}</p></div>`;
+        } else {
+            camposDiv.innerHTML = `
+                <div class="input-group"><label>👤 Tu nombre *</label><input type="text" id="clienteNombre" class="modal-input" placeholder="Ej: Juan Pérez" required></div>
+                <div class="input-group"><label>📱 Teléfono *</label><input type="tel" id="clienteTelefono" class="modal-input" placeholder="Ej: 300 123 4567" required></div>
+                <div class="input-group"><label>📧 Correo electrónico *</label><input type="email" id="clienteEmail" class="modal-input" placeholder="Ej: juan@example.com" required></div>
+            `;
+        }
+    }
+
+    function abrirModalCita() {
+        if (agendandoCita) { alert('Ya hay una cita en proceso'); return; }
+        if (!marcaSeleccionada || !modeloIdSeleccionado || !anoSeleccionado || !serviciosAgregados.length) {
+            alert('Completa los datos del vehículo y selecciona servicios');
+            return;
+        }
+        if (!tecnicoRecomendadoId) {
+            alert('No hay técnico disponible para los servicios seleccionados');
+            return;
+        }
+        mostrarModalCita();
+        citaModal.style.display = 'flex';
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        citaFecha.min = tomorrow.toISOString().split('T')[0];
+        citaHora.innerHTML = '<option value="">Cargando horarios...</option>';
+        cargarHorasDisponibles();
+    }
+
+    function cerrarModal() {
+        citaModal.style.display = 'none';
+        ['clienteNombre','clienteTelefono','clienteEmail','citaFecha','citaHora'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        horarioInfo.innerText = '';
+        confirmarBtn.disabled = true;
+    }
+
+    async function confirmarCita() {
+        if (agendandoCita) return;
+        const clienteLog = JSON.parse(localStorage.getItem('clienteLogueado') || 'null');
+        const token = localStorage.getItem('token');
+        let nombre, telefono, email;
+        if (clienteLog && token) {
+            nombre = clienteLog.nombre;
+            email = clienteLog.email;
+            telefono = clienteLog.telefono || '';
+        } else {
+            nombre = document.getElementById('clienteNombre')?.value;
+            telefono = document.getElementById('clienteTelefono')?.value;
+            email = document.getElementById('clienteEmail')?.value;
+        }
+        const fecha = citaFecha.value;
+        const hora = citaHora.value;
+        if (!nombre || !email || !fecha || !hora) {
+            alert('Completa todos los campos');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert('Correo electrónico inválido');
+            return;
+        }
+        if (!tecnicoRecomendadoId) {
+            alert('No hay técnico disponible');
+            return;
+        }
+        const cita = {
+            cliente: { nombre, telefono: telefono || '', email },
+            vehiculo: { marca: marcaSeleccionada, modelo: modeloNombre, ano: anoSeleccionado, categoria: categoriaVehiculo },
+            servicios: serviciosAgregados.map(s => ({ id: s.id, nombre: s.nombre, precioFinal: s.precioFinal })),
+            total: totalCotizacion,
+            fechaCita: `${fecha} ${hora}`,
+            fechaSolicitud: new Date().toISOString(),
+            id_tecnico: tecnicoRecomendadoId
+        };
+        agendandoCita = true;
+        const btn = document.getElementById('confirmarModalBtn');
+        const originalBtnText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Guardando...';
+        mostrarLoading('Guardando cita...');
+        try {
+            const res = await fetch(`${API_URL}/citas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '' },
+                body: JSON.stringify(cita)
+            });
+            const data = await res.json();
+            ocultarLoading();
+            if (data.success) {
+                successMessage.innerHTML = `✅ ¡Cita agendada! ${nombre}, te esperamos el ${fecha} a las ${hora}. Redirigiendo...`;
+                successMessage.style.display = 'block';
+                cerrarModal();
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                alert('Error: ' + (data.error || 'No se pudo guardar'));
+            }
+        } catch (error) {
+            ocultarLoading();
+            alert('Error de conexión. ¿El backend está corriendo?');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+            agendandoCita = false;
+        }
+    }
+
+    // ========== EVENTOS ==========
+    selectMarca.addEventListener('change', async (e) => {
+        marcaSeleccionada = e.target.value;
+        modeloIdSeleccionado = '';
+        modeloNombre = '';
+        modeloImagenUrl = '';
+        categoriaVehiculo = 'MEDIANO';
+        selectModelo.disabled = true;
+        selectModelo.innerHTML = '<option value="">Primero selecciona una marca</option>';
+        if (marcaSeleccionada) {
+            await cargarModelos(marcaSeleccionada);
+        }
+        actualizarShowcase();
+        verificarEstado();
+        actualizarCategoriaVehiculo();
+    });
+
+    selectModelo.addEventListener('change', (e) => {
+        const selectedOption = e.target.selectedOptions[0];
+        if (!selectedOption || !selectedOption.value) {
+            modeloIdSeleccionado = '';
+            modeloNombre = '';
+            modeloImagenUrl = '';
+            categoriaVehiculo = 'MEDIANO';
+            actualizarShowcase();
+            verificarEstado();
+            actualizarCategoriaVehiculo();
+            return;
+        }
+        modeloIdSeleccionado = selectedOption.value;
+        modeloNombre = selectedOption.textContent;
+        modeloImagenUrl = selectedOption.dataset.imagen || '';
+        categoriaVehiculo = selectedOption.dataset.categoria || 'MEDIANO';
+        actualizarShowcase();
+        actualizarCategoriaVehiculo();
+        verificarEstado();
+    });
+
+    selectAno.addEventListener('change', (e) => {
+        anoSeleccionado = e.target.value;
+        actualizarShowcase();
+        verificarEstado();
+    });
+
+    cotizarBtn.addEventListener('click', cotizarWhatsApp);
+    agendarBtn.addEventListener('click', abrirModalCita);
+    document.getElementById('cancelarModalBtn')?.addEventListener('click', cerrarModal);
+    document.getElementById('confirmarModalBtn')?.addEventListener('click', confirmarCita);
+    window.addEventListener('click', (e) => { if (e.target === citaModal) cerrarModal(); });
+
+    // Validación especial para fechas: bloquear domingos
+    citaFecha.addEventListener('change', () => {
+        if (citaModal.style.display !== 'flex') return;
+        const fecha = new Date(citaFecha.value);
+        if (fecha.getDay() === 0) { // domingo
+            alert('Los domingos no laboramos. Por favor selecciona otro día.');
+            citaFecha.value = '';
+            citaHora.innerHTML = '<option value="">Selecciona primero una fecha</option>';
+            confirmarBtn.disabled = true;
+            horarioInfo.innerText = '';
+            return;
+        }
+        cargarHorasDisponibles();
+    });
+
+    // ========== INICIO ==========
+    (async () => {
+        const cliente = JSON.parse(localStorage.getItem('clienteLogueado') || 'null');
+        if (cliente && cliente.isAdmin) {
+            alert('Los administradores no pueden realizar cotizaciones.');
+            window.location.href = '/admin.html';
+            return;
+        }
+        mostrarLoading('Cargando servicios y marcas...');
+        cargarAnos();
+        await cargarMarcas();
+        await cargarServiciosBackend();
+        ocultarLoading();
+        verificarEstado();
+        recomendarTecnico();
+    })();
+</script>
+</body>
+</html>

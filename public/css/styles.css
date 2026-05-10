@@ -1,0 +1,9 @@
+❌ ERROR CRÍTICO guardando cita:
+❌ Mensaje: Cliente validation failed: password: Path `password` is required.
+❌ Stack: ValidationError: Cliente validation failed: password: Path `password` is required.
+    at model.validate (C:\Users\Balar\OneDrive\Documents\Glow Medallo\glow-medallo-backend\node_modules\mongoose\lib\document.js:2864:36)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async model.$__save (C:\Users\Balar\OneDrive\Documents\Glow Medallo\glow-medallo-backend\node_modules\mongoose\lib\model.js:393:7)
+    at async model.save (C:\Users\Balar\OneDrive\Documents\Glow Medallo\glow-medallo-backend\node_modules\mongoose\lib\model.js:667:5)
+    at async C:\Users\Balar\OneDrive\Documents\Glow Medallo\glow-medallo-backend\server.js:244:13
+=========================================

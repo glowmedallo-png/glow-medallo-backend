@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glow Medallo | Quiénes Somos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+        }
+
+        /* Botón cerrar sesión (estilo único) */
+        button#logoutBtn {
+            background: none;
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        button#logoutBtn:hover {
+            background: #ff4444;
+            color: white;
+        }
+
+        /* SECCIONES DE CONTENIDO */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            margin: 1rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #ccc;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .mv-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .mv-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .mv-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+        }
+
+        .mv-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .mv-card h3 {
+            color: #ffd700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mv-card p {
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        .valores-section {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: #0f0f1a;
+            margin: 2rem 1rem;
+            border-radius: 30px;
+        }
+
+        .valores-section h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .valores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .valor-item {
+            background: #1a1a2e;
+            padding: 1.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .valor-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .valor-item h4 {
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .valor-item p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .historia-section {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .historia-section h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .historia-section p {
+            color: #ccc;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, #ffd70020 0%, #ffb34720 100%);
+            margin: 2rem 1rem;
+            border-radius: 30px;
+        }
+
+        .cta-section h3 {
+            color: #ffd700;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-cta {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <script src="/js/navbar.js"></script>
+</head>
+<body>
+
+<!-- ========== NAVBAR ÚNICO (sin estilos inline) ========== -->
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<!-- Contenido normal de la página -->
+<div class="hero">
+    <h1>✨ Quiénes Somos ✨</h1>
+    <p>En Glow Medallo, transformamos la experiencia del detailing automotriz con calidad, transparencia y pasión por los detalles.</p>
+</div>
+
+<div class="mv-section">
+    <div class="mv-card">
+        <div class="mv-icon">🎯</div>
+        <h3>Misión</h3>
+        <p>Brindar servicios de detailing automotriz de alta calidad, utilizando productos profesionales y técnicas avanzadas, para proteger y embellecer cada vehículo como si fuera nuestro.</p>
+    </div>
+    <div class="mv-card">
+        <div class="mv-icon">👁️</div>
+        <h3>Visión</h3>
+        <p>Ser el referente número uno en detailing automotriz en Medellín y el Área Metropolitana, reconocidos por nuestra excelencia, innovación y compromiso con la satisfacción del cliente.</p>
+    </div>
+</div>
+
+<div class="valores-section">
+    <h2>🌟 Nuestros Valores</h2>
+    <div class="valores-grid">
+        <div class="valor-item">
+            <div class="valor-icon">🔍</div>
+            <h4>Pasión por los Detalles</h4>
+            <p>Cada vehículo recibe atención minuciosa y profesional.</p>
+        </div>
+        <div class="valor-item">
+            <div class="valor-icon">🤝</div>
+            <h4>Confianza</h4>
+            <p>Transparencia total en precios y servicios.</p>
+        </div>
+        <div class="valor-item">
+            <div class="valor-icon">⚡</div>
+            <h4>Excelencia</h4>
+            <p>Buscamos la perfección en cada trabajo realizado.</p>
+        </div>
+        <div class="valor-item">
+            <div class="valor-icon">🌱</div>
+            <h4>Compromiso</h4>
+            <p>Productos de calidad y respeto por el medio ambiente.</p>
+        </div>
+    </div>
+</div>
+
+<div class="historia-section">
+    <h2>📖 Nuestra Historia</h2>
+    <p>Glow Medallo nació en 2020 en la ciudad de Medellín, con la visión de revolucionar el cuidado automotriz en el Valle de Aburrá. Lo que comenzó como un pequeño taller de detailing, hoy se ha convertido en un referente de calidad y confianza para cientos de clientes.</p>
+    <br>
+    <p>Nuestro equipo está conformado por especialistas apasionados con años de experiencia en recubrimientos cerámicos, pulidos de pintura y restauración de interiores. Cada vehículo que llega a nuestras manos recibe el mismo cuidado y dedicación, porque sabemos que tu auto es más que un medio de transporte: es una extensión de ti.</p>
+</div>
+
+<div class="cta-section">
+    <h3>✨ ¿Listo para darle brillo a tu vehículo? ✨</h3>
+    <p>Cotiza ahora y descubre la diferencia de un detailing profesional.</p>
+    <a href="/cotizar.html" class="btn-cta">📱 Cotizar ahora</a>
+</div>
+
+<footer class="footer">
+    <p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p>
+    <p style="font-size: 0.8rem;">📍 Medellín, Colombia | 📞 WhatsApp: 300 000 0000</p>
+</footer>
+
+</body>
+</html>

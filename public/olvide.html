@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar contraseña - Glow Medallo</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1a1a2e;
+            padding: 2rem;
+            border-radius: 25px;
+            border: 1px solid #ffd70033;
+            width: 350px;
+            text-align: center;
+        }
+        h2 { color: #ffd700; margin-bottom: 1rem; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #2a2a3e;
+            border: 1px solid #3a3a5e;
+            border-radius: 12px;
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .mensaje { margin-top: 1rem; color: #69f0ae; }
+        .error { color: #ff8888; }
+        a { color: #ffd700; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><button id="logoutBtn" style="background:none; border:none; color:#fff; cursor:pointer; display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<!-- resto del contenido... -->
+
+<script src="/js/navbar.js"></script>
+</body>
+</html>
+    <div class="container">
+        <h2>🔐 Recuperar contraseña</h2>
+        <p>Ingresa tu correo electrónico registrado</p>
+        <input type="email" id="email" placeholder="tu@email.com">
+        <button onclick="solicitar()">Enviar enlace</button>
+        <div id="mensaje" class="mensaje"></div>
+        <p><a href="/login.html">← Volver al inicio de sesión</a></p>
+    </div>
+    <script>
+        async function solicitar() {
+            const email = document.getElementById('email').value;
+            const div = document.getElementById('mensaje');
+            if (!email) {
+                div.innerHTML = '❌ Ingresa tu correo electrónico';
+                div.className = 'mensaje error';
+                return;
+            }
+            div.innerHTML = '📧 Enviando...';
+            div.className = 'mensaje';
+            try {
+                const res = await fetch('/api/olvide-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    div.innerHTML = '✅ ' + data.mensaje;
+                    div.className = 'mensaje';
+                } else {
+                    div.innerHTML = '❌ ' + data.error;
+                    div.className = 'mensaje error';
+                }
+            } catch (err) {
+                div.innerHTML = '❌ Error de conexión';
+                div.className = 'mensaje error';
+            }
+        }
+    </script>
+    <script src="/js/navbar.js"></script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Glow Medallo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-wrap: wrap;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #ffd700; letter-spacing: 2px; }
+        .logo span { color: #fff; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; flex-wrap: wrap; }
+        .nav-links a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: #ffd700; }
+        button#logoutBtn {
+            background: none;
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .admin-container { max-width: 1300px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #ffd700; margin-bottom: 1.5rem; }
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid #3a3a5e;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            background: #1a1a2e;
+            border-radius: 10px 10px 0 0;
+        }
+        .tab.active {
+            background: #ffd700;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .content {
+            display: none;
+            background: #1a1a2e;
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        .content.active { display: block; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid #3a3a5e;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background: #2a2a3e; color: #ffd700; }
+        input, select, button {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+        }
+        button {
+            background: #ffd700;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 4px;
+        }
+        button.danger { background: #ff4444; color: white; }
+        .accion { margin-bottom: 1rem; }
+        .galeria-form {
+            background: #2a2a3e;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        .galeria-form input, .galeria-form textarea, .galeria-form select {
+            display: block;
+            width: 100%;
+            margin: 0.5rem 0;
+            background: #1a1a2e;
+            color: white;
+            border: 1px solid #3a3a5e;
+        }
+        .galeria-item {
+            display: inline-block;
+            margin: 1rem;
+            text-align: center;
+        }
+        .asignacion-container {
+            margin-top: 2rem;
+            border-top: 1px solid #3a3a5e;
+            padding-top: 1rem;
+        }
+        .servicios-checklist {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .servicios-checklist label {
+            background: #2a2a3e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,215,0,0.1);
+        }
+        .modal-imagen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+        }
+        .modal-imagen img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+        .cerrar-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+        }
+        .cerrar-modal:hover { color: #ffd700; }
+        .foto-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; }
+            .nav-links { justify-content: center; }
+        }
+    </style>
+    <script src="/js/navbar.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<div class="admin-container">
+    <h1>👑 Panel de Administración</h1>
+    <div class="tabs">
+        <div class="tab active" data-tab="tecnicos">👨‍🔧 Técnicos</div>
+        <div class="tab" data-tab="precios">💰 Precios</div>
+        <div class="tab" data-tab="citas">📅 Citas</div>
+        <div class="tab" data-tab="stats">📊 Estadísticas</div>
+        <div class="tab" data-tab="galeria">🖼️ Galería</div>
+        <div class="tab" data-tab="marcas">🏷️ Marcas</div>
+        <div class="tab" data-tab="modelos">🚗 Modelos</div>
+    </div>
+
+    <!-- Técnicos -->
+    <div id="tecnicos" class="content active">
+        <div class="accion"><button id="nuevoTecnicoBtn">+ Nuevo técnico</button></div>
+        <table id="tecnicosTable"><thead><td><th>Foto</th><th>Nombre</th><th>Especialidad</th><th>Experiencia</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+        <div class="asignacion-container">
+            <h3>🔗 Asignar servicios a técnico</h3>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                <div style="flex:1;"><label>Seleccionar técnico:</label><select id="selectTecnicoAsignacion" style="width:100%;"></select></div>
+                <div><button id="guardarAsignacionesBtn">Guardar asignaciones</button></div>
+            </div>
+            <div id="serviciosChecklist" class="servicios-checklist"><p>Selecciona un técnico</p></div>
+        </div>
+    </div>
+
+    <!-- Precios (SOLO SERVICIOS) -->
+    <div id="precios" class="content">
+        <table id="serviciosTable">
+            <thead><tr><th>Servicio</th><th>Precio base (COP)</th><th>Acción</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Citas (SOLO CITAS) -->
+    <div id="citas" class="content">
+        <table id="citasTable">
+            <thead><tr><th>Cliente</th><th>Vehículo</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Estadísticas -->
+    <div id="stats" class="content">
+        <canvas id="ventasChart" width="400" height="200"></canvas><br>
+        <canvas id="clientesChart" width="400" height="200"></canvas>
+        <p>Total ventas: $<span id="totalVentas"></span></p>
+        <p>Total citas: <span id="totalCitas"></span></p>
+        <p>Total clientes: <span id="totalClientes"></span></p>
+    </div>
+
+    <!-- Galería -->
+    <div id="galeria" class="content">
+        <div class="galeria-form">
+            <h3>Subir nueva imagen</h3>
+            <form id="formGaleria" enctype="multipart/form-data">
+                <input type="text" name="titulo" placeholder="Título" required>
+                <textarea name="descripcion" placeholder="Descripción"></textarea>
+                <select name="categoria">
+                    <option value="ceramico">Cerámico</option>
+                    <option value="pulido">Pulido</option>
+                    <option value="interior">Interior</option>
+                </select>
+                <input type="file" name="antes" accept="image/*" required>
+                <input type="file" name="despues" accept="image/*" required>
+                <button type="submit">Subir galería</button>
+            </form>
+        </div>
+        <div id="listaGaleria" style="display: flex; flex-wrap: wrap;"></div>
+    </div>
+
+    <!-- Marcas -->
+<!-- Marcas -->
+<div id="marcas" class="content">
+    <div class="accion"><button onclick="mostrarFormMarca()">+ Nueva marca</button></div>
+    <div id="formMarca" style="display:none; background:#2a2a3e; padding:1rem; margin:1rem 0; border-radius:10px;">
+        <h3>Nueva/Editar marca</h3>
+        <input type="hidden" id="marcaId">
+        <input type="text" id="marcaNombre" placeholder="nombre (ej: audi)" required>
+        <input type="text" id="marcaMostrar" placeholder="Nombre a mostrar (ej: Audi)" required>
+        <div id="marcaImagenPreviewContainer">
+            <img id="marcaImagenPreview" src="" style="max-width: 100px; display: none;">
+        </div>
+        <input type="file" id="marcaImagen" accept="image/*">
+      <button onclick="guardarMarca()">Guardar</button>
+<button onclick="cerrarFormMarca()">Cancelar</button>
+    </div>
+    <table id="marcasTable"><thead>汽<th>ID</th><th>Nombre</th><th>Nombre mostrar</th><th>Imagen</th><th>Acciones</th></thead><tbody></tbody></table>
+</div>
+
+    <!-- Modelos -->
+    <div id="modelos" class="content">
+        <div class="accion"><button onclick="mostrarFormModelo()">+ Nuevo modelo</button></div>
+        <div id="formModelo" style="display:none; background:#2a2a3e; padding:1rem; margin:1rem 0; border-radius:10px;">
+            <h3>Nuevo/Editar modelo</h3>
+            <input type="hidden" id="modeloId">
+            <select id="modeloMarcaId"></select>
+            <input type="text" id="modeloNombre" placeholder="Nombre (ej: A3)" required>
+            <select id="modeloCategoria">
+                <option value="PEQUEÑO">PEQUEÑO</option>
+                <option value="MEDIANO">MEDIANO</option>
+                <option value="SUV">SUV</option>
+            </select>
+            <input type="file" id="modeloImagen" accept="image/*">
+            <button onclick="guardarModelo()">Guardar</button>
+            <button onclick="cerrarFormModelo()">Cancelar</button>
+        </div>
+        <table id="modelosTable"><thead><tr><th>Marca</th><th>Modelo</th><th>Categoría</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+    </div>
+</div>
+
+<footer class="footer"><p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p></footer>
+
+<div id="modalImagenAdmin" class="modal-imagen">
+    <span class="cerrar-modal">&times;</span>
+    <img id="imagenAmpliadaAdmin" src="">
+</div>
+
+<script>
+    const API_URL = '/api';
+    let token = localStorage.getItem('token');
+    let ventasChart, clientesChart;
+    let todosServicios = [];
+    let marcasGlobal = [];
+
+    async function verificarAdmin() {
+        const cliente = JSON.parse(localStorage.getItem('clienteLogueado') || '{}');
+        if (!cliente.isAdmin) { alert('Acceso denegado'); window.location.href = '/'; return false; }
+        if (!token) { window.location.href = '/login.html'; return false; }
+        return true;
+    }
+
+    function initTabs() {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+
+                if (tabId === 'tecnicos') { cargarTecnicos(); cargarTecnicosParaAsignacion(); }
+                if (tabId === 'precios') cargarServicios();
+                if (tabId === 'citas') cargarCitas();
+                if (tabId === 'stats') cargarEstadisticas();
+                if (tabId === 'galeria') cargarGaleria();
+                if (tabId === 'marcas') cargarMarcasAdmin();
+                if (tabId === 'modelos') cargarModelosAdmin();
+            });
+        });
+    }
+
+    // ========== TÉCNICOS ==========
+    async function cargarTecnicos() {
+        const res = await fetch(`${API_URL}/tecnicos`);
+        const tecnicos = await res.json();
+        const tbody = document.querySelector('#tecnicosTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = tecnicos.map(t => `
+            <tr>
+                <td>${t.foto ? `<img src="${t.foto}" class="foto-preview" onclick="abrirImagen('${t.foto}')">` : '📷'}</td>
+                <td>${escapeHtml(t.nombre)}</td>
+                <td>${escapeHtml(t.especialidad)}</td>
+                <td>${t.experiencia} años</td>
+                <td>
+                    <button onclick="editarTecnico('${t._id}')">Editar</button>
+                    <button class="danger" onclick="eliminarTecnico('${t._id}')">Eliminar</button>
+                    <button onclick="subirFotoTecnico('${t._id}')">Subir foto</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.editarTecnico = async (id) => {
+        const nombre = prompt('Nuevo nombre:'); if (!nombre) return;
+        const especialidad = prompt('Especialidad:');
+        const experiencia = parseInt(prompt('Años de experiencia:'));
+        if (isNaN(experiencia)) return alert('Debe ser número');
+        const presentacion = prompt('Breve presentación / biografía del técnico:');
+        const res = await fetch(`${API_URL}/tecnicos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ nombre, especialidad, experiencia, presentacion })
+        });
+        if (res.ok) { cargarTecnicos(); cargarTecnicosParaAsignacion(); }
+        else alert('Error');
+    };
+
+    window.eliminarTecnico = async (id) => {
+        if (!confirm('¿Eliminar permanentemente?')) return;
+        await fetch(`${API_URL}/tecnicos/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        cargarTecnicos(); cargarTecnicosParaAsignacion();
+    };
+
+    window.subirFotoTecnico = async (id) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('foto', file);
+            const res = await fetch(`${API_URL}/tecnicos/${id}/foto`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData
+            });
+            if (res.ok) { cargarTecnicos(); alert('Foto actualizada'); }
+            else alert('Error al subir foto');
+        };
+        input.click();
+    };
+
+    document.getElementById('nuevoTecnicoBtn')?.addEventListener('click', async () => {
+        const nombre = prompt('Nombre:'); if (!nombre) return;
+        const especialidad = prompt('Especialidad:');
+        const experiencia = parseInt(prompt('Experiencia (años):'));
+        if (isNaN(experiencia)) return;
+        const presentacion = prompt('Breve presentación / biografía del técnico:');
+        const res = await fetch(`${API_URL}/tecnicos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ nombre, especialidad, experiencia, presentacion })
+        });
+        if (res.ok) { cargarTecnicos(); cargarTecnicosParaAsignacion(); }
+        else alert('Error al crear');
+    });
+
+    async function cargarServiciosLista() {
+        const res = await fetch(`${API_URL}/servicios`);
+        todosServicios = await res.json();
+    }
+
+    async function cargarTecnicosParaAsignacion() {
+        const res = await fetch(`${API_URL}/tecnicos-con-servicios`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const tecnicos = await res.json();
+        const select = document.getElementById('selectTecnicoAsignacion');
+        select.innerHTML = '<option value="">-- Seleccione un técnico --</option>';
+        tecnicos.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t._id;
+            opt.textContent = `${t.nombre} (${t.especialidad})`;
+            select.appendChild(opt);
+        });
+        document.getElementById('serviciosChecklist').innerHTML = '<p>Selecciona un técnico</p>';
+    }
+
+    async function mostrarChecklist(tecnicoId) {
+        if (!tecnicoId) { document.getElementById('serviciosChecklist').innerHTML = '<p>Selecciona un técnico</p>'; return; }
+        try {
+            const res = await fetch(`${API_URL}/tecnicos/${tecnicoId}`);
+            const tecnico = await res.json();
+            const serviciosIds = tecnico.servicios?.map(s => s._id) || [];
+            if (!todosServicios.length) await cargarServiciosLista();
+            const container = document.getElementById('serviciosChecklist');
+            container.innerHTML = todosServicios.map(s => `
+                <label><input type="checkbox" value="${s._id}" ${serviciosIds.includes(s._id) ? 'checked' : ''}> ${escapeHtml(s.nombre)}</label>
+            `).join('');
+        } catch (error) { console.error(error); }
+    }
+
+    document.getElementById('selectTecnicoAsignacion')?.addEventListener('change', (e) => mostrarChecklist(e.target.value));
+    document.getElementById('guardarAsignacionesBtn')?.addEventListener('click', async () => {
+        const tecnicoId = document.getElementById('selectTecnicoAsignacion').value;
+        if (!tecnicoId) return alert('Seleccione un técnico');
+        const checks = document.querySelectorAll('#serviciosChecklist input:checked');
+        const serviciosIds = Array.from(checks).map(ch => ch.value);
+        await fetch(`${API_URL}/tecnicos/${tecnicoId}/asignar-servicios`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ serviciosIds })
+        });
+        alert('Asignaciones guardadas');
+        cargarTecnicos();
+    });
+
+    // ========== PRECIOS (SOLO SERVICIOS) ==========
+    async function cargarServicios() {
+        console.log("Cargando servicios...");
+        const res = await fetch(`${API_URL}/servicios`);
+        const servicios = await res.json();
+        const tbody = document.querySelector('#serviciosTable tbody');
+        if (!tbody) return;
+        tbody.innerHTML = servicios.map(s => `
+            <tr>
+                <td>${escapeHtml(s.nombre)}</td>
+                <td><input type="number" id="precio-${s._id}" value="${s.precioBase}"></td>
+                <td><button onclick="actualizarPrecio('${s._id}')">Actualizar</button></td>
+            </tr>
+        `).join('');
+    }
+
+    window.actualizarPrecio = async (id) => {
+        const precioBase = parseInt(document.getElementById(`precio-${id}`).value);
+        if (isNaN(precioBase)) return alert('Precio inválido');
+        await fetch(`${API_URL}/servicios/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ precioBase })
+        });
+        alert('Precio actualizado');
+    };
+
+    // ========== CITAS (SOLO CITAS) ==========
+    async function cargarCitas() {
+        console.log("Cargando citas...");
+        const res = await fetch(`${API_URL}/admin/citas`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const citas = await res.json();
+        const tbody = document.querySelector('#citasTable tbody');
+        if (!tbody) return;
+        if (!citas.length) { tbody.innerHTML = '<tr><td colspan="6">No hay citas</td></tr>'; return; }
+        tbody.innerHTML = citas.map(c => `
+            <tr>
+                <td>${escapeHtml(c.cliente.nombre)}<br><small>${escapeHtml(c.cliente.email)}</small></td>
+                <td>${c.vehiculo.marca} ${c.vehiculo.modelo} (${c.vehiculo.ano})</td>
+                <td>${c.fechaCita}</td>
+                <td>$${c.total.toLocaleString('es-CO')}</td>
+                <td><select id="estado-${c._id}">${['pendiente','confirmada','en_proceso','completada','cancelada'].map(s => `<option value="${s}" ${c.estado===s?'selected':''}>${s}</option>`).join('')}</select></td>
+                <td>
+                    <button onclick="actualizarEstado('${c._id}')">Cambiar estado</button>
+                    <button onclick="confirmarCita('${c._id}')">Confirmar (correo)</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.actualizarEstado = async (id) => {
+        const nuevoEstado = document.getElementById(`estado-${id}`).value;
+        await fetch(`${API_URL}/admin/citas/${id}/estado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ estado: nuevoEstado })
+        });
+        alert('Estado actualizado');
+        cargarCitas();
+    };
+
+    window.confirmarCita = async (id) => {
+        await fetch(`${API_URL}/admin/citas/${id}/confirmar`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+        alert('Cita confirmada y correo enviado');
+        cargarCitas();
+    };
+
+    // ========== ESTADÍSTICAS ==========
+    async function cargarEstadisticas() {
+        const res = await fetch(`${API_URL}/admin/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        document.getElementById('totalVentas').innerText = data.totalVentas.toLocaleString('es-CO');
+        document.getElementById('totalCitas').innerText = data.totalCitas;
+        document.getElementById('totalClientes').innerText = data.totalClientes;
+        const meses = Object.keys(data.ventasPorMes).sort();
+        const ventasData = meses.map(m => data.ventasPorMes[m]);
+        const clientesData = meses.map(m => data.clientesPorMes[m] || 0);
+        if (ventasChart) ventasChart.destroy();
+        if (clientesChart) clientesChart.destroy();
+        ventasChart = new Chart(document.getElementById('ventasChart'), { type: 'bar', data: { labels: meses, datasets: [{ label: 'Ventas (COP)', data: ventasData, backgroundColor: '#ffd700' }] } });
+        clientesChart = new Chart(document.getElementById('clientesChart'), { type: 'line', data: { labels: meses, datasets: [{ label: 'Nuevos clientes', data: clientesData, borderColor: '#69f0ae', fill: false }] } });
+    }
+
+    // ========== GALERÍA ==========
+    const modalImg = document.getElementById('modalImagenAdmin');
+    const imgZoom = document.getElementById('imagenAmpliadaAdmin');
+    const cerrarModal = document.querySelector('#modalImagenAdmin .cerrar-modal');
+    window.abrirImagen = (url) => { imgZoom.src = url; modalImg.style.display = 'flex'; };
+    cerrarModal.onclick = () => modalImg.style.display = 'none';
+    modalImg.onclick = (e) => { if (e.target === modalImg) modalImg.style.display = 'none'; };
+
+    async function cargarGaleria() {
+        const res = await fetch(`${API_URL}/galeria`);
+        const imagenes = await res.json();
+        const container = document.getElementById('listaGaleria');
+        container.innerHTML = imagenes.map(img => `
+            <div class="galeria-item"><h4>${escapeHtml(img.titulo)}</h4>
+                <div><img src="${img.url_antes}" width="80" style="cursor:pointer" onclick="abrirImagen('${img.url_antes}')"> → <img src="${img.url_despues}" width="80" style="cursor:pointer" onclick="abrirImagen('${img.url_despues}')"></div>
+                <br><button onclick="eliminarImagen('${img._id}')">Eliminar</button>
+            </div>
+        `).join('');
+    }
+
+    window.eliminarImagen = async (id) => {
+        if (!confirm('¿Eliminar?')) return;
+        await fetch(`${API_URL}/admin/galeria/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        cargarGaleria();
+    };
+
+    document.getElementById('formGaleria')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const res = await fetch(`${API_URL}/admin/galeria`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        if (res.ok) { alert('Imagen subida'); cargarGaleria(); e.target.reset(); }
+        else alert('Error');
+    });
+
+    // ========== MARCAS ==========
+// ========== MARCAS ==========
+async function cargarMarcasAdmin() {
+    try {
+        const res = await fetch(`${API_URL}/marcas`);
+        const marcas = await res.json();
+        marcasGlobal = marcas;
+        const tbody = document.querySelector('#marcasTable tbody');
+        tbody.innerHTML = ''; // Limpiar
+        marcas.forEach(m => {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = m.id || '-';
+            row.insertCell(1).textContent = m.nombre;
+            row.insertCell(2).textContent = m.nombreMostrar;
+            // Celda de imagen
+            const imgCell = row.insertCell(3);
+            if (m.imagen) {
+                const img = document.createElement('img');
+                img.src = m.imagen;
+                img.width = 40;
+                img.style.cursor = 'pointer';
+                img.onclick = () => abrirImagen(m.imagen);
+                imgCell.appendChild(img);
+            } else {
+                imgCell.textContent = '📷';
+            }
+            // Celda de acciones
+            const actionsCell = row.insertCell(4);
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Editar';
+            editBtn.onclick = () => editarMarca(m._id); // Pasa el ID directamente
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Eliminar';
+            deleteBtn.className = 'danger';
+            deleteBtn.onclick = () => eliminarMarca(m._id);
+            actionsCell.appendChild(editBtn);
+            actionsCell.appendChild(deleteBtn);
+        });
+    } catch (error) {
+        console.error('Error cargando marcas:', error);
+    }
+}
+
+  window.mostrarFormMarca = () => {
+    document.getElementById('marcaId').value = '';
+    document.getElementById('marcaNombre').value = '';
+    document.getElementById('marcaMostrar').value = '';
+    document.getElementById('marcaImagenPreview').style.display = 'none';
+    document.getElementById('formMarca').style.display = 'block';
+};
+    window.cerrarFormMarca = () => { document.getElementById('formMarca').style.display = 'none'; };
+  window.guardarMarca = async () => {
+    const id = document.getElementById('marcaId').value;
+    console.log("ID:", id);
+    const nombre = document.getElementById('marcaNombre').value.trim();
+    const nombreMostrar = document.getElementById('marcaMostrar').value.trim();
+    if (!nombre || !nombreMostrar) return alert('Complete los campos');
+    
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('nombreMostrar', nombreMostrar);
+    const fileInput = document.getElementById('marcaImagen');
+    if (fileInput.files.length > 0) {
+        formData.append('imagen', fileInput.files[0]);
+    }
+    
+    let url, method;
+    if (id && id !== '') {
+        url = `${API_URL}/admin/marcas/${id}`;
+        method = 'PUT';
+    } else {
+        url = `${API_URL}/admin/marcas`;
+        method = 'POST';
+    }
+    console.log("Enviando a:", method, url);
+    
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        if (res.ok) {
+            alert('Marca guardada');
+            cargarMarcasAdmin();
+            cerrarFormMarca();
+        } else {
+            const error = await res.text();
+            console.error("Error respuesta:", error);
+            alert('Error: ' + error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
+    }
+};
+window.editarMarca = (id) => {
+    console.log("Editando marca con ID:", id);
+    const marca = marcasGlobal.find(m => m._id === id);
+    if (!marca) {
+        alert('Marca no encontrada');
+        return;
+    }
+    document.getElementById('marcaId').value = marca._id;  // <-- Aquí se asigna el ID
+    document.getElementById('marcaNombre').value = marca.nombre;
+    document.getElementById('marcaMostrar').value = marca.nombreMostrar;
+    // Previsualizar imagen actual
+    const preview = document.getElementById('marcaImagenPreview');
+    if (preview) {
+        if (marca.imagen) {
+            preview.src = marca.imagen;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+    document.getElementById('formMarca').style.display = 'block';
+};
+
+window.eliminarMarca = async (id) => {
+    if (!confirm('¿Eliminar marca? También se eliminarán sus modelos asociados.')) return;
+    const res = await fetch(`${API_URL}/admin/marcas/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+        alert('Marca eliminada');
+        cargarMarcasAdmin();
+        cargarModelosAdmin();
+    } else {
+        alert('Error al eliminar');
+    }
+};
+
+    // ========== MODELOS ==========
+    async function cargarModelosAdmin() {
+        const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const modelos = await res.json();
+        const tbody = document.querySelector('#modelosTable tbody');
+        tbody.innerHTML = modelos.map(m => {
+            const marca = marcasGlobal.find(marca => marca.id === m.marcaId);
+            const nombreMarca = marca ? marca.nombreMostrar : '?';
+            return `
+                <tr>
+                    <td>${nombreMarca}</td>
+                    <td>${escapeHtml(m.nombre)}</td>
+                    <td>${m.categoria}</td>
+                    <td>${m.imagen ? `<img src="${m.imagen}" width="40" style="cursor:pointer" onclick="abrirImagen('${m.imagen}')">` : '📷'}</td>
+                    <td><button onclick="editarModelo('${m._id}')">Editar</button>
+                        <button class="danger" onclick="eliminarModelo('${m._id}')">Eliminar</button></td>
+                </tr>
+            `;
+        }).join('');
+        const selectMarca = document.getElementById('modeloMarcaId');
+        if (selectMarca && marcasGlobal.length) {
+            selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m.id}">${m.nombreMostrar}</option>`).join('');
+        }
+    }
+
+    window.mostrarFormModelo = () => {
+        document.getElementById('formModelo').style.display = 'block';
+        document.getElementById('modeloId').value = '';
+        document.getElementById('modeloNombre').value = '';
+        document.getElementById('modeloCategoria').value = 'MEDIANO';
+        document.getElementById('modeloImagen').value = '';
+    };
+    window.cerrarFormModelo = () => { document.getElementById('formModelo').style.display = 'none'; };
+    window.guardarModelo = async () => {
+        const id = document.getElementById('modeloId').value;
+        const nombre = document.getElementById('modeloNombre').value.trim();
+        const marcaId = parseInt(document.getElementById('modeloMarcaId').value);
+        const categoria = document.getElementById('modeloCategoria').value;
+        if (!nombre || !marcaId) return alert('Complete los campos');
+        const formData = new FormData();
+        formData.append('nombre', nombre);
+        formData.append('marcaId', marcaId);
+        formData.append('categoria', categoria);
+        const file = document.getElementById('modeloImagen').files[0];
+        if (file) formData.append('imagen', file);
+        let url, method;
+        if (id) { url = `${API_URL}/admin/modelos/${id}`; method = 'PUT'; }
+        else { url = `${API_URL}/admin/modelos`; method = 'POST'; }
+        const res = await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+        if (res.ok) { alert('Modelo guardado'); cargarModelosAdmin(); cerrarFormModelo(); }
+        else alert('Error');
+    };
+    window.editarModelo = async (id) => {
+        const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const modelos = await res.json();
+        const modelo = modelos.find(m => m._id === id);
+        if (!modelo) return;
+        document.getElementById('modeloId').value = modelo._id;
+        document.getElementById('modeloNombre').value = modelo.nombre;
+        document.getElementById('modeloCategoria').value = modelo.categoria;
+        const select = document.getElementById('modeloMarcaId');
+        for (let i=0; i<select.options.length; i++) {
+            if (parseInt(select.options[i].value) === modelo.marcaId) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+        document.getElementById('formModelo').style.display = 'block';
+    };
+    window.eliminarModelo = async (id) => {
+        if (!confirm('¿Eliminar modelo?')) return;
+        await fetch(`${API_URL}/admin/modelos/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+        cargarModelosAdmin();
+    };
+
+    // ========== UTILS ==========
+    function escapeHtml(str) { return str?.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) || ''; }
+
+    // ========== INICIO ==========
+    (async function() {
+        if (!await verificarAdmin()) return;
+        initTabs();
+        await cargarServiciosLista();
+        await cargarTecnicos();
+        await cargarTecnicosParaAsignacion();
+        await cargarMarcasAdmin();
+        await cargarModelosAdmin();
+        // Cargar solo la pestaña activa inicial (técnicos)
+        cargarTecnicos();
+        cargarTecnicosParaAsignacion();
+    })();
+</script>
+<script>
+    // Sobrescribir funciones de marcas para asegurar funcionamiento
+    window.editarMarca = function(id) {
+        alert("Función editarMarca ejecutada. ID: " + id);
+        const marca = marcasGlobal.find(m => m._id === id);
+        if (!marca) return alert("Marca no encontrada");
+        document.getElementById('marcaId').value = marca._id;
+        document.getElementById('marcaNombre').value = marca.nombre;
+        document.getElementById('marcaMostrar').value = marca.nombreMostrar;
+        document.getElementById('formMarca').style.display = 'block';
+    };
+    window.guardarMarca = async () => {
+    const id = document.getElementById('marcaId').value;
+    const nombre = document.getElementById('marcaNombre').value.trim();
+    const nombreMostrar = document.getElementById('marcaMostrar').value.trim();
+    if (!nombre || !nombreMostrar) return alert('Complete los campos');
+    
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('nombreMostrar', nombreMostrar);
+    const fileInput = document.getElementById('marcaImagen');
+    if (fileInput.files.length > 0) {
+        formData.append('imagen', fileInput.files[0]);
+    }
+    
+    let url, method;
+    // Si id existe Y no es la string "undefined" ni vacía
+    if (id && id !== '' && id !== 'undefined') {
+        url = `${API_URL}/admin/marcas/${id}`;
+        method = 'PUT';
+    } else {
+        url = `${API_URL}/admin/marcas`;
+        method = 'POST';
+    }
+    console.log(`Guardando marca con método ${method} a ${url}`);
+    
+    try {
+        const res = await fetch(url, {
+            method,
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        if (res.ok) {
+            alert('Marca guardada correctamente');
+            cargarMarcasAdmin();
+            cerrarFormMarca();
+        } else {
+            const errorText = await res.text();
+            console.error('Error respuesta:', errorText);
+            alert('Error del servidor: ' + errorText);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error de conexión');
+    }
+};
+    window.cerrarFormMarca = function() {
+        document.getElementById('formMarca').style.display = 'none';
+    };
+    window.mostrarFormMarca = function() {
+        document.getElementById('marcaId').value = '';
+        document.getElementById('marcaNombre').value = '';
+        document.getElementById('marcaMostrar').value = '';
+        document.getElementById('formMarca').style.display = 'block';
+    };
+    console.log("Funciones de marcas sobreescritas");
+</script>
+</body>
+</html>

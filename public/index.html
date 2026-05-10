@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glow Medallo | Detailing de Excelencia en Medellín</title>
+    <style>
+        /* Todos los estilos anteriores se mantienen, solo se añaden los nuevos para opiniones */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* NAVBAR (igual que antes) */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            letter-spacing: 2px;
+        }
+
+        .logo span {
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: #ffd700;
+        }
+
+        button#logoutBtn {
+            background: none;
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button#logoutBtn:hover {
+            background: #ff4444;
+            color: white;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            margin: 1rem;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #ccc;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .btn-cta {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            color: #1a1a2e;
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+        }
+
+        /* SECCIÓN DE SERVICIOS PREVIEW */
+        .section {
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .section h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cards {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 1.5rem;
+            width: 250px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h3 {
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* PREVIEW TÉCNICOS */
+        .tecnicos-preview {
+            background: #0f0f1a;
+            margin: 1rem;
+            border-radius: 30px;
+            padding: 2rem;
+        }
+
+        .tecnico-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 1rem;
+            text-align: center;
+            width: 200px;
+        }
+
+        .tecnico-foto {
+            width: 100px;
+            height: 100px;
+            background: #2a2a3e;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            border: 2px solid #ffd700;
+            overflow: hidden;
+        }
+
+        .tecnico-foto img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .tecnico-nombre {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .tecnico-especialidad {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+
+        /* SECCIÓN UBICACIÓN */
+        .ubicacion-section {
+            padding: 3rem 2rem;
+            background: #0f0f1a;
+            margin: 1rem;
+            border-radius: 30px;
+        }
+
+        .ubicacion-section h2 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .ubicacion-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .ubicacion-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .ubicacion-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: transform 0.3s;
+        }
+
+        .ubicacion-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+        }
+
+        .ubicacion-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ubicacion-card h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .ubicacion-card p {
+            color: #ccc;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .ubicacion-card a {
+            color: #69f0ae;
+            text-decoration: none;
+        }
+
+        .ubicacion-card a:hover {
+            text-decoration: underline;
+        }
+
+        .ubicacion-mapa {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .ubicacion-mapa h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .mapa-container {
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .mapa-nota {
+            text-align: center;
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .mapa-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: #69f0ae;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.3s;
+        }
+        .mapa-link:hover {
+            color: #ffd700;
+            text-decoration: underline;
+        }
+
+        /* SECCIÓN OPINIONES DE CLIENTES */
+        .opiniones-section {
+            padding: 3rem 2rem;
+            background: #0f0f1a;
+            margin: 1rem;
+            border-radius: 30px;
+        }
+        .opiniones-section h2 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        .opiniones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .opinion-card {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,215,0,0.2);
+            transition: transform 0.3s;
+        }
+        .opinion-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+        }
+        .opinion-estrellas {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .opinion-comentario {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+            font-style: italic;
+        }
+        .opinion-cliente {
+            color: #69f0ae;
+            font-size: 0.8rem;
+            text-align: right;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .ubicacion-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== NAVBAR ÚNICO ========== -->
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>✨ Detailing de Excelencia en Medellín</h1>
+    <p>Protege y embellece tu vehículo con los mejores especialistas. Recubrimientos cerámicos, pulidos y más.</p>
+    <a href="/cotizar.html" class="btn-cta">📱 Cotizar ahora</a>
+</section>
+
+<!-- SERVICIOS DESTACADOS -->
+<section class="section">
+    <h2>🔧 Nuestros Servicios</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">✨</div>
+            <h3>Recubrimiento Cerámico</h3>
+            <p>Protección avanzada con brillo espejo</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🔄</div>
+            <h3>Pulido de Pintura</h3>
+            <p>Eliminación de rayas y restauración</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🪑</div>
+            <h3>Limpieza de Tapicería</h3>
+            <p>Limpieza profunda de interiores</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🔧</div>
+            <h3>Detallado de Motor</h3>
+            <p>Limpieza profesional del motor</p>
+        </div>
+    </div>
+</section>
+
+<!-- PREVIEW DE TÉCNICOS -->
+<section class="tecnicos-preview">
+    <h2 style="text-align: center; color: #ffd700; margin-bottom: 2rem;">👨‍🔧 Nuestros Expertos</h2>
+    <div class="cards" id="tecnicosPreview">
+        <div class="tecnico-card">
+            <div class="tecnico-foto">👨‍🔧</div>
+            <div class="tecnico-nombre">Carlos Restrepo</div>
+            <div class="tecnico-especialidad">Recubrimientos Cerámicos</div>
+            <div style="font-size: 0.7rem; color: #888;">8 años de experiencia</div>
+        </div>
+        <div class="tecnico-card">
+            <div class="tecnico-foto">👩‍🔧</div>
+            <div class="tecnico-nombre">Ana María López</div>
+            <div class="tecnico-especialidad">Restauración de Pintura</div>
+            <div style="font-size: 0.7rem; color: #888;">6 años de experiencia</div>
+        </div>
+        <div class="tecnico-card">
+            <div class="tecnico-foto">👨‍🔧</div>
+            <div class="tecnico-nombre">Julián Pérez</div>
+            <div class="tecnico-especialidad">Detallado de Interiores</div>
+            <div style="font-size: 0.7rem; color: #888;">5 años de experiencia</div>
+        </div>
+    </div>
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="/tecnicos.html" class="btn-cta" style="background: #2a2a3e; color: #ffd700;">Ver todos los técnicos →</a>
+    </div>
+</section>
+
+<!-- SECCIÓN OPINIONES DE CLIENTES -->
+<section class="opiniones-section">
+    <h2>⭐ Lo que dicen nuestros clientes</h2>
+    <div id="opinionesContainer" class="opiniones-grid">
+        <div style="text-align:center; width:100%;">Cargando opiniones...</div>
+    </div>
+</section>
+
+<!-- SECCIÓN UBICACIÓN -->
+<section class="ubicacion-section">
+    <h2>📍 ¿Dónde Estamos?</h2>
+    <div class="ubicacion-container">
+        <div class="ubicacion-info">
+            <div class="ubicacion-card">
+                <div class="ubicacion-icon">🏠</div>
+                <h3>Nuestra Sede Principal</h3>
+                <p>Calle 10 # 35-30</p>
+                <p>Barrio El Poblado, Medellín</p>
+                <p>📞 <a href="tel:+573133701915">3133701915</a></p>
+                <p>📧 <a href="mailto:glowmedallo@gmail.com">glowmedallo@gmail.com</a></p>
+            </div>
+            <div class="ubicacion-card">
+                <div class="ubicacion-icon">⏰</div>
+                <h3>Horarios de Atención</h3>
+                <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+                <p>Sábados: 9:00 AM - 4:00 PM</p>
+                <p>Domingos: Cerrado</p>
+            </div>
+            <div class="ubicacion-card">
+                <div class="ubicacion-icon">🚗</div>
+                <h3>Cobertura</h3>
+                <p>Atendemos en todo el Área Metropolitana:</p>
+                <p>Medellín • Envigado • Itagüí • Sabaneta • La Estrella</p>
+            </div>
+        </div>
+        <div class="ubicacion-mapa">
+            <h3>📍 Encuéntranos en el mapa</h3>
+            <div class="mapa-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.1154!2d-75.5688!3d6.2442!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e4428b0c8b0c8b0%3A0x0!2sCl%2010%20%2335-30%2C%20El%20Poblado%2C%20Medell%C3%ADn%2C%20Antioquia!5e0!3m2!1ses!2sco!4v1690000000000!5m2!1ses!2sco" 
+                    width="100%" 
+                    height="250" 
+                    style="border:0; border-radius: 15px;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            </div>
+            <p class="mapa-nota">📍 Estamos ubicados en El Poblado, corazón de Medellín</p>
+            <div style="text-align: center;">
+                <a href="https://maps.google.com/?q=Cl+10+%2335-30,+El+Poblado,+Medellín" target="_blank" class="mapa-link">🗺️ Abrir en Google Maps</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p>
+    <p style="font-size: 0.8rem; margin-top: 0.5rem;">📍 Medellín | 📞 WhatsApp: 3133701915</p>
+</footer>
+
+<script>
+    // Cargar técnicos dinámicamente para el preview
+    async function cargarTecnicosPreview() {
+        try {
+            const response = await fetch('/api/tecnicos');
+            const tecnicos = await response.json();
+            if (tecnicos.length > 0) {
+                const container = document.getElementById('tecnicosPreview');
+                container.innerHTML = '';
+                tecnicos.slice(0, 3).forEach(tecnico => {
+                    container.innerHTML += `
+                        <div class="tecnico-card">
+                            <div class="tecnico-foto">${tecnico.foto ? `<img src="${tecnico.foto}" alt="${tecnico.nombre}">` : (tecnico.especialidad?.toLowerCase().includes('cerámico') ? '✨' : '👨‍🔧')}</div>
+                            <div class="tecnico-nombre">${escapeHtml(tecnico.nombre)}</div>
+                            <div class="tecnico-especialidad">${escapeHtml(tecnico.especialidad)}</div>
+                            <div style="font-size: 0.7rem; color: #888;">${tecnico.experiencia} años de experiência</div>
+                        </div>
+                    `;
+                });
+            }
+        } catch (error) {
+            console.error('Error cargando técnicos:', error);
+            document.getElementById('tecnicosPreview').innerHTML = '<div style="text-align:center;">Error al cargar técnicos</div>';
+        }
+    }
+
+    // Cargar opiniones de servicios con mejor manejo de errores
+    async function cargarOpiniones() {
+        const container = document.getElementById('opinionesContainer');
+        try {
+            const res = await fetch('/api/calificaciones-servicio');
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const opiniones = await res.json();
+            
+            if (!opiniones.length) {
+                container.innerHTML = '<p style="text-align:center">Aún no hay opiniones. ¡Sé el primero en calificar tu servicio!</p>';
+                return;
+            }
+            container.innerHTML = opiniones.map(op => `
+                <div class="opinion-card">
+                    <div class="opinion-estrellas">${'★'.repeat(op.estrellas)}${'☆'.repeat(5-op.estrellas)}</div>
+                    <div class="opinion-comentario">“${escapeHtml(op.comentario || 'Sin comentario')}”</div>
+                    <div class="opinion-cliente">- ${escapeHtml(op.cliente)} (${escapeHtml(op.servicios)})</div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error cargando opiniones:', error);
+            container.innerHTML = '<p style="text-align:center">Error al cargar opiniones. Intente más tarde.</p>';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
+    }
+
+    // Ejecutar ambas funciones
+    cargarTecnicosPreview();
+    cargarOpiniones();
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

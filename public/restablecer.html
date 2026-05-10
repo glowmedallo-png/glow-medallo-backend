@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restablecer contraseña - Glow Medallo</title>
+    <style>
+        body { background: #1a1a2e; color: #fff; font-family: Arial; text-align: center; }
+        input, button { padding: 10px; margin: 10px; border-radius: 10px; border: none; }
+        button { background: #ffd700; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><button id="logoutBtn" style="background:none; border:none; color:#fff; cursor:pointer; display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+    <h2>Restablecer contraseña</h2>
+    <input type="password" id="password" placeholder="Nueva contraseña (mínimo 6 caracteres)">
+    <br>
+    <button onclick="restablecer()">Guardar nueva contraseña</button>
+    <div id="mensaje"></div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        async function restablecer() {
+            const nuevaPassword = document.getElementById('password').value;
+            if (nuevaPassword.length < 6) {
+                alert('Mínimo 6 caracteres');
+                return;
+            }
+            const res = await fetch('/api/restablecer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, nuevaPassword })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                document.getElementById('mensaje').innerHTML = '✅ Contraseña actualizada. <a href="/login.html">Iniciar sesión</a>';
+            } else {
+                document.getElementById('mensaje').innerHTML = '❌ ' + data.error;
+            }
+        }
+    </script>
+    <script src="/js/navbar.js"></script>
+</body>
+</html>
