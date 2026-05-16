@@ -62,7 +62,6 @@
             color: #ffd700;
         }
 
-        /* Botón cerrar sesión (estilo único) */
         button#logoutBtn {
             background: none;
             border: 1px solid #ff4444;
@@ -185,6 +184,70 @@
             font-size: 0.9rem;
         }
 
+        /* GALERÍA ACORDEÓN (IMÁGENES PLEGABLES) */
+        .galeria-acordeon {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+        .galeria-acordeon h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .acordeon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            justify-items: center;
+        }
+        .acordeon-item {
+            background: #1a1a2e;
+            border-radius: 20px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 280px;
+            border: 1px solid rgba(255,215,0,0.2);
+            transition: all 0.3s;
+        }
+        .acordeon-item:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+        }
+        .acordeon-header {
+            cursor: pointer;
+            background: #0f0f1a;
+            overflow: hidden;
+        }
+        .acordeon-header img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s;
+        }
+        .acordeon-header:hover img {
+            transform: scale(1.02);
+        }
+        .acordeon-content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            background: #1e1e2e;
+            color: #ddd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .acordeon-content p {
+            padding: 1rem 0;
+            margin: 0;
+        }
+        .acordeon-item.active .acordeon-content {
+            max-height: 150px;
+        }
+
         .historia-section {
             max-width: 1000px;
             margin: 3rem auto;
@@ -254,13 +317,20 @@
             .hero h1 {
                 font-size: 2rem;
             }
+            .acordeon-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+            .acordeon-item {
+                max-width: 100%;
+            }
         }
     </style>
     <script src="/js/navbar.js"></script>
 </head>
 <body>
 
-<!-- ========== NAVBAR ÚNICO (sin estilos inline) ========== -->
+<!-- ========== NAVBAR ÚNICO ========== -->
 <nav class="navbar">
     <div class="logo">✨ GLOW <span>MEDALLO</span></div>
     <ul class="nav-links">
@@ -277,7 +347,7 @@
     </ul>
 </nav>
 
-<!-- Contenido normal de la página -->
+<!-- Contenido principal -->
 <div class="hero">
     <h1>✨ Quiénes Somos ✨</h1>
     <p>En Glow Medallo, transformamos la experiencia del detailing automotriz con calidad, transparencia y pasión por los detalles.</p>
@@ -322,6 +392,46 @@
     </div>
 </div>
 
+<!-- GALERÍA PLEGABLE (IMÁGENES ACORDEÓN) -->
+<div class="galeria-acordeon">
+    <h2>📸 Nuestro trabajo y equipo</h2>
+    <p style="text-align: center; color: #aaa; margin-bottom: 2rem;">Haz clic en cada imagen para ver más detalles</p>
+    <div class="acordeon-grid">
+        <div class="acordeon-item">
+            <div class="acordeon-header" onclick="toggleAcordeon(this)">
+                <img src="/uploads/info/equipo1.png" alt="Equipo Glow Medallo">
+            </div>
+            <div class="acordeon-content">
+                <p>👥 Equipo humano apasionado por el detailing. Todos somos expertos certificados.</p>
+            </div>
+        </div>
+        <div class="acordeon-item">
+            <div class="acordeon-header" onclick="toggleAcordeon(this)">
+                <img src="/uploads/info/taller.png" alt="Nuestro taller">
+            </div>
+            <div class="acordeon-content">
+                <p>🔧 Taller equipado con la última tecnología para recubrimientos cerámicos y pulidos.</p>
+            </div>
+        </div>
+        <div class="acordeon-item">
+            <div class="acordeon-header" onclick="toggleAcordeon(this)">
+                <img src="/uploads/info/antes-despues.png" alt="Antes y después">
+            </div>
+            <div class="acordeon-content">
+                <p>✨ Transformación real: restauramos la pintura y el brillo de cada vehículo.</p>
+            </div>
+        </div>
+        <div class="acordeon-item">
+            <div class="acordeon-header" onclick="toggleAcordeon(this)">
+                <img src="/uploads/info/productos.png" alt="Productos profesionales">
+            </div>
+            <div class="acordeon-content">
+                <p>🧴 Solo usamos productos de alta gama, respetuosos con el medio ambiente.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="historia-section">
     <h2>📖 Nuestra Historia</h2>
     <p>Glow Medallo nació en 2020 en la ciudad de Medellín, con la visión de revolucionar el cuidado automotriz en el Valle de Aburrá. Lo que comenzó como un pequeño taller de detailing, hoy se ha convertido en un referente de calidad y confianza para cientos de clientes.</p>
@@ -339,6 +449,14 @@
     <p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p>
     <p style="font-size: 0.8rem;">📍 Medellín, Colombia | 📞 WhatsApp: 300 000 0000</p>
 </footer>
+
+<script>
+    function toggleAcordeon(element) {
+        const parentItem = element.closest('.acordeon-item');
+        if (!parentItem) return;
+        parentItem.classList.toggle('active');
+    }
+</script>
 
 </body>
 </html>

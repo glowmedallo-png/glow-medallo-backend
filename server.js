@@ -895,6 +895,7 @@ app.delete('/api/admin/modelos/:id', verificarAdmin, async (req, res) => {
     }
 });
 
+// ========== RECOMENDAR TÉCNICO (CON FOTO) ==========
 app.post('/api/recomendar-tecnico', async (req, res) => {
     try {
         const { idsServicios } = req.body;
@@ -918,6 +919,7 @@ app.post('/api/recomendar-tecnico', async (req, res) => {
                     id: mejorTecnico._id,
                     nombre: mejorTecnico.nombre,
                     especialidad: mejorTecnico.especialidad,
+                    foto: mejorTecnico.foto || '',          // ← NUEVO: incluye la foto
                     matchCount: maxMatch,
                     totalSeleccionados: idsServicios.length
                 }

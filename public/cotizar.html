@@ -97,10 +97,37 @@
             display: none;
             border-left: 4px solid #ffd700;
             color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #recomendacionContainer:hover {
+            background: #3a3a5e;
         }
         #recomendacionContainer strong,
         #recomendacionContainer small {
             color: white;
+        }
+        .recomendado-desc {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 0.5rem;
+            margin-top: 0;
+            color: #ccc;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .recomendado-desc.show {
+            max-height: 200px; /* suficiente para la descripción */
+            padding: 0.5rem 0.5rem 0 0.5rem;
+        }
+        .recomendado-foto {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1a1a2e;
+            border: 2px solid #ffd700;
         }
         .horario-info { font-size: 0.75rem; color: #aaa; margin-top: 0.3rem; }
         @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } .vehicle-card { position: static; } }
@@ -170,9 +197,16 @@
                 <div id="resumenTotal" class="resumen-total">Total: $0</div>
             </div>
             <div id="recomendacionContainer">
-                <div style="display: flex; align-items: center; gap: 0.8rem;">
-                    <span style="font-size: 1.5rem;">👨‍🔧</span>
-                    <div><strong>Técnico recomendado:</strong> <span id="recomendadoNombre">-</span><br><small id="recomendadoMatch">-</small></div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <img id="recomendadoFoto" class="recomendado-foto" src="" alt="Técnico">
+                    <div style="flex:1;">
+                        <strong>Técnico recomendado:</strong> <span id="recomendadoNombre">-</span><br>
+                        <small id="recomendadoMatch">-</small>
+                    </div>
+                    <span style="font-size: 1.2rem;">👇</span>
+                </div>
+                <div id="recomendadoDescripcion" class="recomendado-desc">
+                    <!-- Aquí se cargará dinámicamente la descripción completa -->
                 </div>
             </div>
             <button id="cotizarBtn" class="cotizar-btn" disabled>📱 COTIZAR POR WHATSAPP</button>
@@ -235,6 +269,7 @@
     let serviciosAgregados = [];
     let totalCotizacion = 0;
     let tecnicoRecomendadoId = null;
+    let tecnicoDescripcionCompleta = ''; // Guardar descripción para el acordeón
     const factorPrecio = { "PEQUEÑO": 1.0, "MEDIANO": 1.3, "SUV": 1.6 };
     let horasDisponibles = [];
 
@@ -256,6 +291,11 @@
     const citaHora = document.getElementById('citaHora');
     const horarioInfo = document.getElementById('horarioInfo');
     const confirmarBtn = document.getElementById('confirmarModalBtn');
+    const recomendacionContainer = document.getElementById('recomendacionContainer');
+    const recomendadoFoto = document.getElementById('recomendadoFoto');
+    const recomendadoNombre = document.getElementById('recomendadoNombre');
+    const recomendadoMatch = document.getElementById('recomendadoMatch');
+    const recomendadoDescripcionDiv = document.getElementById('recomendadoDescripcion');
 
     // ========== LOADER ==========
     function mostrarLoading(msg = 'Procesando...') {
@@ -449,10 +489,10 @@
         successMessage.style.display = 'block';
     }
 
-    // ========== RECOMENDAR TÉCNICO ==========
+    // ========== RECOMENDAR TÉCNICO (CON FOTO Y DESCRIPCIÓN) ==========
     async function recomendarTecnico() {
         if (serviciosAgregados.length === 0) {
-            document.getElementById('recomendacionContainer').style.display = 'none';
+            recomendacionContainer.style.display = 'none';
             tecnicoRecomendadoId = null;
             return;
         }
@@ -466,18 +506,49 @@
             const data = await res.json();
             if (data.recomendado) {
                 tecnicoRecomendadoId = data.recomendado.id;
-                document.getElementById('recomendadoNombre').innerText = `${data.recomendado.nombre} (${data.recomendado.especialidad})`;
-                document.getElementById('recomendadoMatch').innerText = `Cubre ${data.recomendado.matchCount} de ${data.recomendado.totalSeleccionados} servicios`;
-                document.getElementById('recomendacionContainer').style.display = 'block';
+                recomendadoNombre.innerText = `${data.recomendado.nombre} (${data.recomendado.especialidad})`;
+                recomendadoMatch.innerText = `Cubre ${data.recomendado.matchCount} de ${data.recomendado.totalSeleccionados} servicios`;
+                
+                // Cargar foto si existe
+                if (data.recomendado.foto && data.recomendado.foto !== '') {
+                    recomendadoFoto.src = data.recomendado.foto;
+                } else {
+                    recomendadoFoto.src = '/uploads/tecnicos/default.png'; // imagen por defecto si no hay
+                    recomendadoFoto.style.opacity = '0.7';
+                }
+                recomendadoFoto.style.display = 'block';
+                
+                // Construir descripción completa (simulada o desde backend)
+                // Como el backend actual no envía experiencia ni certificaciones, armamos algo básico.
+                // En el futuro podrías ampliar el endpoint para enviar más campos.
+                let descHtml = `<p><strong>👨‍🔧 ${data.recomendado.nombre}</strong><br>`;
+                descHtml += `🎯 Especialidad: ${data.recomendado.especialidad}<br>`;
+                descHtml += `📋 Coincidencia: ${data.recomendado.matchCount} de ${data.recomendado.totalSeleccionados} servicios seleccionados.<br>`;
+                descHtml += `⭐ Experiencia: Amplia trayectoria en detailing de alta gama.<br>`;
+                descHtml += `📞 Será asignado a tu servicio para garantizar calidad.</p>`;
+                recomendadoDescripcionDiv.innerHTML = descHtml;
+                
+                recomendacionContainer.style.display = 'block';
+                
+                // Configurar evento click para expandir/colapsar descripción
+                // Eliminamos listeners anteriores para evitar duplicados
+                recomendacionContainer.removeEventListener('click', toggleDescripcion);
+                recomendacionContainer.addEventListener('click', toggleDescripcion);
             } else {
                 tecnicoRecomendadoId = null;
-                document.getElementById('recomendacionContainer').style.display = 'none';
+                recomendacionContainer.style.display = 'none';
             }
         } catch (error) {
             console.error(error);
             tecnicoRecomendadoId = null;
-            document.getElementById('recomendacionContainer').style.display = 'none';
+            recomendacionContainer.style.display = 'none';
         }
+    }
+    
+    // Función para toggle de la descripción
+    function toggleDescripcion(event) {
+        // Evitamos que si el clic fue sobre un enlace o botón dentro (no hay) se propague
+        recomendadoDescripcionDiv.classList.toggle('show');
     }
 
     // ========== HORAS DISPONIBLES ==========

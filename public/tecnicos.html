@@ -132,6 +132,12 @@
             font-size: 4rem;
             border: 3px solid #ffd700;
             overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .tecnico-foto:hover {
+            transform: scale(1.05);
         }
 
         .tecnico-foto img {
@@ -193,6 +199,43 @@
             font-size: 0.9rem;
         }
 
+        /* MODAL PARA ZOOM DE IMAGEN (LIGHTBOX) */
+        .modal-imagen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .modal-imagen img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .cerrar-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .cerrar-modal:hover {
+            color: #ffd700;
+        }
+
         /* FOOTER */
         .footer {
             text-align: center;
@@ -250,6 +293,12 @@
     <div class="loading">Cargando técnicos especialistas...</div>
 </div>
 
+<!-- MODAL PARA VER IMAGEN GRANDE -->
+<div id="modalImagen" class="modal-imagen">
+    <span class="cerrar-modal">&times;</span>
+    <img id="imagenGrande" src="" alt="Técnico ampliado">
+</div>
+
 <!-- FOOTER -->
 <footer class="footer">
     <p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p>
@@ -258,6 +307,18 @@
 
 <script>
     const API_URL = '/api';
+
+    // Funciones para el modal de imagen
+    function abrirImagen(url) {
+        const modal = document.getElementById('modalImagen');
+        const imgGrande = document.getElementById('imagenGrande');
+        imgGrande.src = url;
+        modal.style.display = 'flex';
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalImagen').style.display = 'none';
+    }
 
     async function cargarTecnicos() {
         const container = document.getElementById('tecnicosContainer');
@@ -278,19 +339,24 @@
                 const promedio = califData.promedio || 0;
                 const totalVotos = califData.total || 0;
 
-                // Construir tarjeta (con foto si existe, sino emoji)
+                // Construir tarjeta
                 const card = document.createElement('div');
                 card.className = 'tecnico-card';
 
                 let fotoHTML = '';
-                if (tecnico.foto && tecnico.foto.trim() !== '') {
-                    fotoHTML = `<img src="${tecnico.foto}" alt="${tecnico.nombre}" style="width:100%; height:100%; object-fit:cover;">`;
+                const fotoUrl = tecnico.foto && tecnico.foto.trim() !== '' ? tecnico.foto : null;
+                if (fotoUrl) {
+                    fotoHTML = `<img src="${fotoUrl}" alt="${tecnico.nombre}" onclick="event.stopPropagation(); abrirImagen('${fotoUrl}')">`;
                 } else {
                     fotoHTML = getIconoPorEspecialidad(tecnico.especialidad);
                 }
 
+                // Certificaciones
+                const certificaciones = tecnico.certificaciones || [];
+                const certsHTML = certificaciones.map(cert => `<span class="cert-badge">${escapeHtml(cert)}</span>`).join('');
+
                 card.innerHTML = `
-                    <div class="tecnico-foto">${fotoHTML}</div>
+                    <div class="tecnico-foto" onclick="event.stopPropagation(); ${fotoUrl ? `abrirImagen('${fotoUrl}')` : ''}">${fotoHTML}</div>
                     <div class="tecnico-nombre">${escapeHtml(tecnico.nombre)}</div>
                     <div class="tecnico-especialidad">${escapeHtml(tecnico.especialidad)}</div>
                     <div class="tecnico-experiencia">⭐ ${tecnico.experiencia} años de experiencia</div>
@@ -299,7 +365,7 @@
                         ⭐ ${promedio.toFixed(1)} (${totalVotos} calificaciones)
                     </div>
                     <div class="tecnico-certificaciones">
-                        ${(tecnico.certificaciones || []).map(cert => `<span class="cert-badge">${escapeHtml(cert)}</span>`).join('')}
+                        ${certsHTML}
                     </div>
                 `;
                 container.appendChild(card);
@@ -330,7 +396,14 @@
         });
     }
 
-    // Iniciar
+    // Eventos del modal
+    document.getElementById('modalImagen').addEventListener('click', function(e) {
+        if (e.target === this || e.target.classList.contains('cerrar-modal')) {
+            cerrarModal();
+        }
+    });
+
+    // Cargar técnicos al iniciar
     cargarTecnicos();
 </script>
 </body>
