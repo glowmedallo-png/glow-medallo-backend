@@ -1069,7 +1069,7 @@ const connectDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     cachedDb = mongoose.connection;
     console.log('✅ Conectado a MongoDB');
-    await insertarDatosIniciales();
+    // await insertarDatosIniciales(); // COMENTADO
     return cachedDb;
 };
 
