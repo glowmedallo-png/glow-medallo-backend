@@ -1058,6 +1058,11 @@ const connectDB = async () => {
     console.log('✅ Conectado a MongoDB');
     await insertarDatosIniciales();
 };
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+    res.send('Servidor Glow Medallo funcionando 🚀');
+});
 
 // ========================== INICIAR SERVIDOR ==========================
 const PORT = process.env.PORT || 5000;
