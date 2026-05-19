@@ -1055,9 +1055,12 @@ app.get('/api/calificaciones-servicio', async (req, res) => {
 
 const connectDB = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
+
     console.log('✅ Conectado a MongoDB');
+
     await insertarDatosIniciales();
 };
+
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
@@ -1066,7 +1069,21 @@ app.get('/', (req, res) => {
 
 // ========================== INICIAR SERVIDOR ==========================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, async () => {
-    console.log(`\n🚀 Servidor corriendo en http://localhost:${PORT}`);
-    await connectDB();
-});
+
+const startServer = async () => {
+    try {
+
+        await connectDB();
+
+        app.listen(PORT, () => {
+            console.log(`\n🚀 Servidor corriendo en puerto ${PORT}`);
+        });
+
+    } catch (error) {
+
+        console.error('❌ Error iniciando servidor:', error);
+
+    }
+};
+
+startServer();
