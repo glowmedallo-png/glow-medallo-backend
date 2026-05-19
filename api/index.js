@@ -1063,13 +1063,11 @@ app.get('/api/calificaciones-servicio', async (req, res) => {
 
 let cachedDb = null;
 const connectDB = async () => {
-    if (cachedDb && mongoose.connection.readyState === 1) {
-        return cachedDb;
-    }
+    if (cachedDb && mongoose.connection.readyState === 1) return cachedDb;
     await mongoose.connect(process.env.MONGODB_URI);
     cachedDb = mongoose.connection;
     console.log('✅ Conectado a MongoDB');
-    // await insertarDatosIniciales(); // COMENTADO
+    await insertarDatosIniciales(); // ← DESCOMENTAR
     return cachedDb;
 };
 
