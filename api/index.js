@@ -143,6 +143,10 @@ app.get('/ping', (req, res) => {
 });
 
 app.use(async (req, res, next) => {
+    // No intentar conectar a BD para la ruta de diagnóstico /ping
+    if (req.path === '/ping') {
+        return next();
+    }
     try {
         await connectDB();
         next();
