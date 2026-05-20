@@ -29,16 +29,102 @@ transporter.verify((error, success) => {
     else console.log('✅ Servidor de correo configurado correctamente');
 });
 
-// ========================== MODELOS ==========================
-const Servicio = require('./models/Servicio.js');
-const Marca = require('./models/Marca.js');
-const Modelo = require('./models/Modelo.js');
-const Cita = require('./models/Cita.js');
-const Cliente = require('./models/Cliente.js');
-const Tecnico = require('./models/Tecnico.js');
-const Calificacion = require('./models/Calificacion.js');
-const Galeria = require('./models/Galeria.js');
-const CalificacionServicio = require('./models/CalificacionServicio.js');
+// ========================== MODELOS (DEFINIDOS DIRECTAMENTE) ==========================
+const Schema = mongoose.Schema;
+
+const servicioSchema = new Schema({
+    id: Number,
+    nombre: String,
+    descripcion: String,
+    precioBase: Number,
+    categoria: String,
+    activo: { type: Boolean, default: true }
+}, { strict: false });
+const Servicio = mongoose.model('Servicio', servicioSchema);
+
+const marcaSchema = new Schema({
+    id: Number,
+    nombre: String,
+    nombreMostrar: String,
+    imagen: String,
+    activo: { type: Boolean, default: true }
+}, { strict: false });
+const Marca = mongoose.model('Marca', marcaSchema);
+
+const modeloSchema = new Schema({
+    id: Number,
+    marcaId: Schema.Types.ObjectId,
+    nombre: String,
+    categoria: String,
+    imagen: String,
+    activo: { type: Boolean, default: true }
+}, { strict: false });
+const Modelo = mongoose.model('Modelo', modeloSchema);
+
+const citaSchema = new Schema({
+    cliente: Object,
+    vehiculo: Object,
+    servicios: Array,
+    total: Number,
+    fechaCita: String,
+    fechaSolicitud: Date,
+    id_tecnico: Schema.Types.ObjectId,
+    estado: { type: String, default: 'pendiente' }
+}, { timestamps: true, strict: false });
+const Cita = mongoose.model('Cita', citaSchema);
+
+const clienteSchema = new Schema({
+    nombre: String,
+    email: String,
+    telefono: String,
+    password: String,
+    es_registrado: { type: Boolean, default: false },
+    resetToken: String,
+    resetExpires: Date,
+    citas: [{ type: Schema.Types.ObjectId, ref: 'Cita' }],
+    isAdmin: { type: Boolean, default: false }
+}, { timestamps: true, strict: false });
+const Cliente = mongoose.model('Cliente', clienteSchema);
+
+const tecnicoSchema = new Schema({
+    id: Number,
+    nombre: String,
+    foto: String,
+    especialidad: String,
+    experiencia: Number,
+    certificaciones: [String],
+    servicios: [{ type: Schema.Types.ObjectId, ref: 'Servicio' }],
+    activo: { type: Boolean, default: true },
+    presentacion: String
+}, { timestamps: true, strict: false });
+const Tecnico = mongoose.model('Tecnico', tecnicoSchema);
+
+const calificacionSchema = new Schema({
+    id_cita: Schema.Types.ObjectId,
+    id_tecnico: Schema.Types.ObjectId,
+    id_cliente: Schema.Types.ObjectId,
+    estrellas: Number,
+    comentario: String
+}, { timestamps: true, strict: false });
+const Calificacion = mongoose.model('Calificacion', calificacionSchema);
+
+const galeriaSchema = new Schema({
+    titulo: String,
+    descripcion: String,
+    categoria: String,
+    url_antes: String,
+    url_despues: String,
+    activo: { type: Boolean, default: true }
+}, { timestamps: true, strict: false });
+const Galeria = mongoose.model('Galeria', galeriaSchema);
+
+const calificacionServicioSchema = new Schema({
+    id_cita: Schema.Types.ObjectId,
+    id_cliente: Schema.Types.ObjectId,
+    estrellas: Number,
+    comentario: String
+}, { timestamps: true, strict: false });
+const CalificacionServicio = mongoose.model('CalificacionServicio', calificacionServicioSchema);
 
 // ========================== CONFIGURACIÓN DE EXPRESS ==========================
 const app = express();
