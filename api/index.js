@@ -30,15 +30,15 @@ transporter.verify((error, success) => {
 });
 
 // ========================== MODELOS ==========================
-const Servicio = require('../models/Servicio.js');
-const Marca = require('../models/Marca.js');
-const Modelo = require('../models/Modelo.js');
-const Cita = require('../models/Cita.js');
-const Cliente = require('../models/Cliente.js');
-const Tecnico = require('../models/Tecnico.js');
-const Calificacion = require('../models/Calificacion.js');
-const Galeria = require('../models/Galeria.js');
-const CalificacionServicio = require('../models/CalificacionServicio.js');
+const Servicio = require('./models/Servicio.js');
+const Marca = require('./models/Marca.js');
+const Modelo = require('./models/Modelo.js');
+const Cita = require('./models/Cita.js');
+const Cliente = require('./models/Cliente.js');
+const Tecnico = require('./models/Tecnico.js');
+const Calificacion = require('./models/Calificacion.js');
+const Galeria = require('./models/Galeria.js');
+const CalificacionServicio = require('./models/CalificacionServicio.js');
 
 // ========================== CONFIGURACIÓN DE EXPRESS ==========================
 const app = express();
