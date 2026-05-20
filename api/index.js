@@ -48,6 +48,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+app.get('/ping', (req, res) => {
+    res.json({
+        status: 'ok',
+        mongodb_uri: process.env.MONGODB_URI ? 'definida' : 'no definida',
+        node_env: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+    });
+});
+
 app.use(async (req, res, next) => {
     try {
         await connectDB();
