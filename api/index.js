@@ -142,16 +142,19 @@ app.get('/ping', (req, res) => {
     });
 });
 
+// Middleware de conexión a BD (excluye /ping)
 app.use(async (req, res, next) => {
-    // No intentar conectar a BD para la ruta de diagnóstico /ping
+    // No conectar en la ruta de diagnóstico
     if (req.path === '/ping') {
+        console.log('🔍 Ping recibido, omitiendo conexión a BD');
         return next();
     }
     try {
+        console.log('🔄 Conectando a MongoDB...');
         await connectDB();
         next();
     } catch (err) {
-        console.error(err);
+        console.error('❌ Error en conexión:', err);
         res.status(500).json({ error: 'Error de conexión a la base de datos' });
     }
 });
