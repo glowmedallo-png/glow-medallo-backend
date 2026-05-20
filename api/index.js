@@ -1165,11 +1165,17 @@ app.get('/api/calificaciones-servicio', async (req, res) => {
 let cachedDb = null;
 const connectDB = async () => {
     if (cachedDb && mongoose.connection.readyState === 1) return cachedDb;
-    await mongoose.connect(process.env.MONGODB_URI);
-    cachedDb = mongoose.connection;
-    console.log('✅ Conectado a MongoDB');
-    await insertarDatosIniciales(); // ← DESCOMENTAR
-    return cachedDb;
+    console.log('🔄 URI a conectar:', process.env.MONGODB_URI ? 'OK (definida)' : 'NO DEFINIDA');
+    try {
+        await mongoose.connect(process.env.MONGODB_URI);
+        cachedDb = mongoose.connection;
+        console.log('✅ Conectado a MongoDB');
+        // await insertarDatosIniciales();  // COMENTADO temporalmente para pruebas
+        return cachedDb;
+    } catch (err) {
+        console.error('❌ Error detallado de conexión:', err.message);
+        throw err;
+    }
 };
 
 app.use(express.static('public'));
