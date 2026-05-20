@@ -137,9 +137,8 @@ app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.get('/ping', (req, res) => {
     res.json({
         status: 'ok',
-        mongodb_uri: process.env.MONGODB_URI ? 'definida' : 'no definida',
-        node_env: process.env.NODE_ENV,
-        timestamp: new Date().toISOString()
+        mongodb_uri: process.env.MONGODB_URI ? 'definida' : 'NO DEFINIDA',
+        env: process.env.NODE_ENV || 'no definido'
     });
 });
 
