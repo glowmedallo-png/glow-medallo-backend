@@ -145,7 +145,7 @@ app.get('/ping', (req, res) => {
 // Middleware de conexión a BD (excluye /ping)
 app.use(async (req, res, next) => {
     // No conectar en la ruta de diagnóstico
-    if (req.path === '/ping') {
+    if (req.path.startsWith('/ping')) {
         console.log('🔍 Ping recibido, omitiendo conexión a BD');
         return next();
     }
