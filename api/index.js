@@ -181,9 +181,9 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const streamifier = require('streamifier');
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
+ccloudinary.config({
+    cloud_name: 'dcpfstgsm',
+    api_key: '855885351789461',
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
