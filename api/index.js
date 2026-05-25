@@ -1003,7 +1003,18 @@ app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
 app.get('/api/admin/modelos', verificarAdmin, async (req, res) => {
     try {
         const modelos = await Modelo.find().populate('marcaId', 'nombre nombreMostrar');
-        res.json(modelos);
+        // Añadir el nombre de la marca a cada modelo
+        const modelosConMarca = modelos.map(m => ({
+            _id: m._id,
+            id: m.id,
+            nombre: m.nombre,
+            categoria: m.categoria,
+            imagen: m.imagen,
+            activo: m.activo,
+            marcaId: m.marcaId?._id || m.marcaId, // el ObjectId de la marca o el número
+            marcaNombre: m.marcaId ? m.marcaId.nombreMostrar : (typeof m.marcaId === 'number' ? 'Marca antigua' : '?')
+        }));
+        res.json(modelosConMarca);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1090,11 +1101,11 @@ app.delete('/api/admin/modelos/:id', verificarAdmin, async (req, res) => {
     try {
         const modelo = await Modelo.findById(req.params.id);
         if (!modelo) return res.status(404).json({ error: 'Modelo no encontrado' });
-        if (modelo.imagen) {
-            const imgPath = path.join(__dirname, 'public', modelo.imagen);
-            if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+        if (modelo.imagen && modelo.imagen.includes('cloudinary')) {
+            const publicId = modelo.imagen.split('/').slice(-2).join('/').split('.')[0];
+            await cloudinary.uploader.destroy(publicId);
         }
-        await Modelo.deleteOne({ _id: req.params.id });
+        await Modelo.findByIdAndDelete(req.params.id);
         res.json({ success: true });
     } catch (error) {
         res.status(500).json({ error: error.message });
