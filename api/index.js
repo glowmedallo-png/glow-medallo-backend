@@ -894,30 +894,37 @@ app.get('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
 
 app.post('/api/admin/marcas', verificarAdmin, uploadMarca.single('imagen'), async (req, res) => {
     try {
+        console.log('1. Inicio');
         const { nombre, nombreMostrar } = req.body;
         if (!nombre || !nombreMostrar) return res.status(400).json({ error: 'Faltan datos' });
         
-        // Calcular id numérico
-        const ultimaMarca = await Marca.findOne().sort({ id: -1 });
-        const newId = ultimaMarca ? ultimaMarca.id + 1 : 1;
-        
         let imagenUrl = '';
         if (req.file) {
-            const result = await new Promise((resolve, reject) => {
-                const uploadStream = cloudinary.uploader.upload_stream(
-                    { folder: 'marcas' },
-                    (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    }
-                );
-                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
-            });
-            imagenUrl = result.secure_url;
+            console.log('2. Archivo recibido:', req.file.originalname, req.file.size);
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    const uploadStream = cloudinary.uploader.upload_stream(
+                        { folder: 'marcas' },
+                        (error, result) => {
+                            if (error) {
+                                console.error('Cloudinary error:', error);
+                                reject(error);
+                            } else {
+                                resolve(result);
+                            }
+                        }
+                    );
+                    streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+                });
+                imagenUrl = result.secure_url;
+                console.log('3. Imagen subida:', imagenUrl);
+            } catch (err) {
+                console.error('Error subiendo a Cloudinary:', err);
+                return res.status(500).json({ error: 'Cloudinary error: ' + err.message });
+            }
         }
         
         const nuevaMarca = new Marca({
-            id: newId,
             nombre: nombre.toLowerCase(),
             nombreMostrar,
             imagen: imagenUrl,
@@ -926,6 +933,7 @@ app.post('/api/admin/marcas', verificarAdmin, uploadMarca.single('imagen'), asyn
         await nuevaMarca.save();
         res.json({ success: true, marca: nuevaMarca });
     } catch (error) {
+        console.error('Error general:', error);
         res.status(500).json({ error: error.message });
     }
 });
