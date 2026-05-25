@@ -1002,19 +1002,24 @@ app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
 // ========== GESTIÓN DE MODELOS (ADMIN) ==========
 app.get('/api/admin/modelos', verificarAdmin, async (req, res) => {
     try {
-        const modelos = await Modelo.find().populate('marcaId', 'nombre nombreMostrar');
-        // Añadir el nombre de la marca a cada modelo
-        const modelosConMarca = modelos.map(m => ({
-            _id: m._id,
-            id: m.id,
-            nombre: m.nombre,
-            categoria: m.categoria,
-            imagen: m.imagen,
-            activo: m.activo,
-            marcaId: m.marcaId?._id || m.marcaId, // el ObjectId de la marca o el número
-            marcaNombre: m.marcaId ? m.marcaId.nombreMostrar : (typeof m.marcaId === 'number' ? 'Marca antigua' : '?')
+        const modelos = await Modelo.find();
+        // Para cada modelo, obtenemos el nombre de la marca
+        const modelosConNombre = await Promise.all(modelos.map(async (modelo) => {
+            let marcaNombre = '?';
+            if (modelo.marcaId) {
+                const marca = await Marca.findById(modelo.marcaId);
+                if (marca) marcaNombre = marca.nombreMostrar;
+            }
+            return {
+                _id: modelo._id,
+                nombre: modelo.nombre,
+                categoria: modelo.categoria,
+                imagen: modelo.imagen,
+                marcaId: modelo.marcaId,
+                marcaNombre: marcaNombre
+            };
         }));
-        res.json(modelosConMarca);
+        res.json(modelosConNombre);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
