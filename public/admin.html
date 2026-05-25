@@ -757,9 +757,9 @@ window.eliminarMarca = async (id) => {
             `;
         }).join('');
         const selectMarca = document.getElementById('modeloMarcaId');
-        if (selectMarca && marcasGlobal.length) {
-            selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m.id}">${m.nombreMostrar}</option>`).join('');
-        }
+if (selectMarca && marcasGlobal.length) {
+    selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
+}
     }
 
     window.mostrarFormModelo = () => {
@@ -770,42 +770,43 @@ window.eliminarMarca = async (id) => {
         document.getElementById('modeloImagen').value = '';
     };
     window.cerrarFormModelo = () => { document.getElementById('formModelo').style.display = 'none'; };
-    window.guardarModelo = async () => {
-        const id = document.getElementById('modeloId').value;
-        const nombre = document.getElementById('modeloNombre').value.trim();
-        const marcaId = parseInt(document.getElementById('modeloMarcaId').value);
-        const categoria = document.getElementById('modeloCategoria').value;
-        if (!nombre || !marcaId) return alert('Complete los campos');
-        const formData = new FormData();
-        formData.append('nombre', nombre);
-        formData.append('marcaId', marcaId);
-        formData.append('categoria', categoria);
-        const file = document.getElementById('modeloImagen').files[0];
-        if (file) formData.append('imagen', file);
-        let url, method;
-        if (id) { url = `${API_URL}/admin/modelos/${id}`; method = 'PUT'; }
-        else { url = `${API_URL}/admin/modelos`; method = 'POST'; }
-        const res = await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-        if (res.ok) { alert('Modelo guardado'); cargarModelosAdmin(); cerrarFormModelo(); }
-        else alert('Error');
-    };
-    window.editarModelo = async (id) => {
-        const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
-        const modelos = await res.json();
-        const modelo = modelos.find(m => m._id === id);
-        if (!modelo) return;
-        document.getElementById('modeloId').value = modelo._id;
-        document.getElementById('modeloNombre').value = modelo.nombre;
-        document.getElementById('modeloCategoria').value = modelo.categoria;
-        const select = document.getElementById('modeloMarcaId');
-        for (let i=0; i<select.options.length; i++) {
-            if (parseInt(select.options[i].value) === modelo.marcaId) {
-                select.selectedIndex = i;
-                break;
-            }
+   window.guardarModelo = async () => {
+    const id = document.getElementById('modeloId').value;
+    const nombre = document.getElementById('modeloNombre').value.trim();
+    const marcaId = document.getElementById('modeloMarcaId').value;   // ya no parseInt
+    const categoria = document.getElementById('modeloCategoria').value;
+    if (!nombre || !marcaId) return alert('Complete los campos');
+    const formData = new FormData();
+    formData.append('nombre', nombre);
+    formData.append('marcaId', marcaId);
+    formData.append('categoria', categoria);
+    const file = document.getElementById('modeloImagen').files[0];
+    if (file) formData.append('imagen', file);
+    let url, method;
+    if (id) { url = `${API_URL}/admin/modelos/${id}`; method = 'PUT'; }
+    else { url = `${API_URL}/admin/modelos`; method = 'POST'; }
+    const res = await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+    if (res.ok) { alert('Modelo guardado'); cargarModelosAdmin(); cerrarFormModelo(); }
+    else alert('Error');
+};
+   window.editarModelo = async (id) => {
+    const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const modelos = await res.json();
+    const modelo = modelos.find(m => m._id === id);
+    if (!modelo) return;
+    document.getElementById('modeloId').value = modelo._id;
+    document.getElementById('modeloNombre').value = modelo.nombre;
+    document.getElementById('modeloCategoria').value = modelo.categoria;
+    const select = document.getElementById('modeloMarcaId');
+    // modelo.marcaId debe ser el _id de la marca (string)
+    for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === modelo.marcaId) {
+            select.selectedIndex = i;
+            break;
         }
-        document.getElementById('formModelo').style.display = 'block';
-    };
+    }
+    document.getElementById('formModelo').style.display = 'block';
+};
     window.eliminarModelo = async (id) => {
         if (!confirm('¿Eliminar modelo?')) return;
         await fetch(`${API_URL}/admin/modelos/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
