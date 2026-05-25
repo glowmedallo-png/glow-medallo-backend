@@ -987,14 +987,10 @@ app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
             marca = await Marca.findOne({ id: parseInt(idParam) });
         }
         if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
-
-        // Eliminar imagen de Cloudinary si existe
-        if (marca.imagen) {
-            // Extraer public_id de la URL de Cloudinary (asumiendo formato .../upload/v.../marcas/nombre.jpg)
+        if (marca.imagen && marca.imagen.includes('cloudinary')) {
             const publicId = marca.imagen.split('/').slice(-2).join('/').split('.')[0];
             await cloudinary.uploader.destroy(publicId);
         }
-
         await Marca.deleteOne({ _id: marca._id });
         res.json({ success: true, mensaje: 'Marca eliminada' });
     } catch (error) {
