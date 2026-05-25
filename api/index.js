@@ -193,8 +193,8 @@ const uploadGaleria = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1
 
 // Las siguientes subidas siguen usando disco (solo funcionarán en entorno local o con persistencia)
 const uploadTecnico = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
-const uploadMarca = multer({ storage: storageFactory('marcas'), limits: { fileSize: 2 * 1024 * 1024 } });
-const uploadModelo = multer({ storage: storageFactory('modelos'), limits: { fileSize: 2 * 1024 * 1024 } });
+const uploadMarca = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
+const uploadModelo = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 
 
 // ========================== MIDDLEWARE ADMIN ==========================
@@ -896,14 +896,31 @@ app.post('/api/admin/marcas', verificarAdmin, uploadMarca.single('imagen'), asyn
     try {
         const { nombre, nombreMostrar } = req.body;
         if (!nombre || !nombreMostrar) return res.status(400).json({ error: 'Faltan datos' });
+        
+        // Calcular id numérico
         const ultimaMarca = await Marca.findOne().sort({ id: -1 });
         const newId = ultimaMarca ? ultimaMarca.id + 1 : 1;
-        const imagen = req.file ? `/uploads/marcas/${req.file.filename}` : '';
+        
+        let imagenUrl = '';
+        if (req.file) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'marcas' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            imagenUrl = result.secure_url;
+        }
+        
         const nuevaMarca = new Marca({
             id: newId,
             nombre: nombre.toLowerCase(),
             nombreMostrar,
-            imagen,
+            imagen: imagenUrl,
             activo: true
         });
         await nuevaMarca.save();
@@ -922,11 +939,18 @@ app.put('/api/admin/marcas/:id', verificarAdmin, uploadMarca.single('imagen'), a
         if (nombreMostrar) marca.nombreMostrar = nombreMostrar;
         if (activo !== undefined) marca.activo = activo === 'true' || activo === true;
         if (req.file) {
-            if (marca.imagen) {
-                const oldPath = path.join(__dirname, 'public', marca.imagen);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-            }
-            marca.imagen = `/uploads/marcas/${req.file.filename}`;
+            // Subir nueva imagen a Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'marcas' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            marca.imagen = result.secure_url;
         }
         await marca.save();
         res.json({ success: true, marca });
@@ -973,15 +997,31 @@ app.post('/api/admin/modelos', verificarAdmin, uploadModelo.single('imagen'), as
     try {
         const { marcaId, nombre, categoria, activo } = req.body;
         if (!marcaId || !nombre) return res.status(400).json({ error: 'Faltan datos' });
+        
         const ultimoModelo = await Modelo.findOne().sort({ id: -1 });
         const newId = ultimoModelo ? ultimoModelo.id + 1 : 1;
-        const imagen = req.file ? `/uploads/modelos/${req.file.filename}` : '';
+        
+        let imagenUrl = '';
+        if (req.file) {
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'modelos' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            imagenUrl = result.secure_url;
+        }
+        
         const nuevoModelo = new Modelo({
             id: newId,
             marcaId,
             nombre,
             categoria: categoria || 'MEDIANO',
-            imagen,
+            imagen: imagenUrl,
             activo: activo === 'true' || activo === true || true
         });
         await nuevoModelo.save();
@@ -1001,11 +1041,17 @@ app.put('/api/admin/modelos/:id', verificarAdmin, uploadModelo.single('imagen'),
         if (categoria) modelo.categoria = categoria;
         if (activo !== undefined) modelo.activo = activo === 'true' || activo === true;
         if (req.file) {
-            if (modelo.imagen) {
-                const oldPath = path.join(__dirname, 'public', modelo.imagen);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-            }
-            modelo.imagen = `/uploads/modelos/${req.file.filename}`;
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'modelos' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            modelo.imagen = result.secure_url;
         }
         await modelo.save();
         res.json({ success: true, modelo });
