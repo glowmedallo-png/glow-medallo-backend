@@ -659,25 +659,48 @@
     };
 
     // ========== MODELOS ==========
-  async function cargarModelosAdmin() {
-    const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const modelos = await res.json();
-    const tbody = document.querySelector('#modelosTable tbody');
-    tbody.innerHTML = modelos.map(m => `
-        <tr>
-            <td>${m.marcaNombre || '?'}</td>
-            <td>${escapeHtml(m.nombre)}</td>
-            <td>${m.categoria}</td>
-            <td>${m.imagen ? `<img src="${m.imagen}" width="40" style="cursor:pointer" onclick="abrirImagen('${m.imagen}')">` : '📷'}</td>
-            <td>
-                <button onclick="editarModelo('${m._id}')">Editar</button>
-                <button class="danger" onclick="eliminarModelo('${m._id}')">Eliminar</button>
-            </td>
-        </tr>
-    `).join('');
-    const selectMarca = document.getElementById('modeloMarcaId');
-    if (selectMarca && marcasGlobal.length) {
-        selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
+ async function cargarModelosAdmin() {
+    try {
+        const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) throw new Error('Error al cargar modelos');
+        const modelos = await res.json();
+        const tbody = document.querySelector('#modelosTable tbody');
+        tbody.innerHTML = '';
+        modelos.forEach(m => {
+            const row = tbody.insertRow();
+            row.insertCell(0).textContent = m.marcaNombre || '?';
+            row.insertCell(1).textContent = m.nombre;
+            row.insertCell(2).textContent = m.categoria;
+            const imgCell = row.insertCell(3);
+            if (m.imagen) {
+                const img = document.createElement('img');
+                img.src = m.imagen;
+                img.width = 40;
+                img.style.cursor = 'pointer';
+                img.onclick = () => abrirImagen(m.imagen);
+                imgCell.appendChild(img);
+            } else {
+                imgCell.textContent = '📷';
+            }
+            const actionsCell = row.insertCell(4);
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Editar';
+            editBtn.onclick = () => editarModelo(m._id);
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Eliminar';
+            deleteBtn.className = 'danger';
+            deleteBtn.onclick = () => eliminarModelo(m._id);
+            actionsCell.appendChild(editBtn);
+            actionsCell.appendChild(deleteBtn);
+        });
+        // Llenar select de marcas para el formulario (si es necesario)
+        const selectMarca = document.getElementById('modeloMarcaId');
+        if (selectMarca && marcasGlobal.length) {
+            selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
+        }
+    } catch (error) {
+        console.error('Error en cargarModelosAdmin:', error);
+        document.querySelector('#modelosTable tbody').innerHTML = '<tr><td colspan="5">Error al cargar modelos</td></tr>';
     }
 }
     window.mostrarFormModelo = () => {

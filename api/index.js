@@ -1003,24 +1003,25 @@ app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
 app.get('/api/admin/modelos', verificarAdmin, async (req, res) => {
     try {
         const modelos = await Modelo.find();
-        // Para cada modelo, obtenemos el nombre de la marca
-        const modelosConNombre = await Promise.all(modelos.map(async (modelo) => {
+        const modelosConNombre = [];
+        for (const modelo of modelos) {
             let marcaNombre = '?';
             if (modelo.marcaId) {
                 const marca = await Marca.findById(modelo.marcaId);
                 if (marca) marcaNombre = marca.nombreMostrar;
             }
-            return {
+            modelosConNombre.push({
                 _id: modelo._id,
                 nombre: modelo.nombre,
                 categoria: modelo.categoria,
                 imagen: modelo.imagen,
                 marcaId: modelo.marcaId,
                 marcaNombre: marcaNombre
-            };
-        }));
+            });
+        }
         res.json(modelosConNombre);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
