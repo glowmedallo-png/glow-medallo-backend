@@ -15,7 +15,11 @@ function actualizarNavbar() {
     const perfilLink = document.querySelector('a[href="/perfil.html"]');
     const adminLink = document.querySelector('a[href="/admin.html"]');
     const logoutBtn = document.getElementById('logoutBtn');
-    
+    const misCitasLink = document.querySelector('a[href="/mis-citas.html"]');
+    if (misCitasLink) {
+    if (cliente && token) misCitasLink.style.display = 'block';
+    else misCitasLink.style.display = 'none';
+     }
     if (token && cliente) {
         // Usuario logueado: ocultar registro y login
         if (registroLink) registroLink.style.display = 'none';

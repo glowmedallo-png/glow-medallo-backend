@@ -1226,6 +1226,7 @@ app.delete('/api/admin/galeria/:id', verificarAdmin, async (req, res) => {
 // ========================== FUNCIÓN AUXILIAR CORREO ==========================
 async function enviarCorreoConfirmacion(citaData, citaId) {
     try {
+        console.log(`📧 Correo enviado a ${cliente.email}`);
         const { cliente, vehiculo, servicios, total, fechaCita } = citaData;
         const fechaFormateada = new Date(fechaCita).toLocaleString('es-CO');
         const listaServicios = servicios.map(s => `• ${s.nombre}: $${s.precioFinal.toLocaleString('es-CO')} COP`).join('\n');

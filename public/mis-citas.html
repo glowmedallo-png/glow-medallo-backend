@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas - Glow Medallo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-wrap: wrap;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; color: #ffd700; letter-spacing: 2px; }
+        .logo span { color: #fff; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; flex-wrap: wrap; }
+        .nav-links a { color: #fff; text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: #ffd700; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #ffd700; margin-bottom: 1rem; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a1a2e;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #3a3a5e;
+            padding: 12px;
+            text-align: left;
+        }
+        th { background: #2a2a3e; color: #ffd700; }
+        .estado-pendiente { color: #ffaa00; }
+        .estado-confirmada { color: #00ff00; }
+        .estado-completada { color: #69f0ae; }
+        .estado-cancelada { color: #ff4444; }
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #0a0a0f;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255,215,0,0.1);
+        }
+    </style>
+    <script src="/js/navbar.js"></script>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">✨ GLOW <span>MEDALLO</span></div>
+    <ul class="nav-links">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/info.html">Quiénes Somos</a></li>
+        <li><a href="/cotizar.html">Cotizar</a></li>
+        <li><a href="/tecnicos.html">Técnicos</a></li>
+        <li><a href="/galeria.html">Galería</a></li>
+        <li><a href="/registro.html">Registro</a></li>
+        <li><a href="/login.html">Iniciar sesión</a></li>
+        <li><a href="/perfil.html" style="display:none;">Mi Perfil</a></li>
+        <li><a href="/mis-citas.html" style="display:none;">Mis Citas</a></li>
+        <li><a href="/admin.html" style="display:none;">Administración</a></li>
+        <li><button id="logoutBtn" style="display:none;">Cerrar sesión</button></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <h1>📅 Mis Citas</h1>
+    <div id="citas-container">
+        <p>Cargando tus citas...</p>
+    </div>
+</div>
+
+<footer class="footer">
+    <p>✨ Glow Medallo - Detailing de Excelencia en Medellín ✨</p>
+</footer>
+
+<script>
+    const API_URL = '/api';
+    const token = localStorage.getItem('token');
+
+    async function cargarMisCitas() {
+        if (!token) {
+            window.location.href = '/login.html';
+            return;
+        }
+        try {
+            const res = await fetch(`${API_URL}/citas/mis-citas`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const citas = await res.json();
+            const container = document.getElementById('citas-container');
+            if (!citas.length) {
+                container.innerHTML = '<p>No tienes citas agendadas.</p>';
+                return;
+            }
+            const table = `
+                <table>
+                    <thead>
+                        <tr><th>Fecha y Hora</th><th>Vehículo</th><th>Servicios</th><th>Total</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        ${citas.map(c => `
+                            <tr>
+                                <td>${new Date(c.fechaCita).toLocaleString('es-CO')}</td>
+                                <td>${c.vehiculo.marca} ${c.vehiculo.modelo} (${c.vehiculo.ano})</td>
+                                <td>${c.servicios.map(s => s.nombre).join(', ')}</td>
+                                <td>$${c.total.toLocaleString('es-CO')}</td>
+                                <td><span class="estado-${c.estado}">${c.estado}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = table;
+        } catch (error) {
+            console.error(error);
+            document.getElementById('citas-container').innerHTML = '<p>Error al cargar tus citas. Intenta de nuevo.</p>';
+        }
+    }
+
+    cargarMisCitas();
+</script>
+</body>
+</html>
