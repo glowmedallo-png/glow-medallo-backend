@@ -1003,14 +1003,14 @@ app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
 app.get('/api/admin/modelos', verificarAdmin, async (req, res) => {
     try {
         const modelos = await Modelo.find();
-        const modelosConNombre = [];
+        const resultado = [];
         for (const modelo of modelos) {
             let marcaNombre = '?';
             if (modelo.marcaId) {
                 const marca = await Marca.findById(modelo.marcaId);
                 if (marca) marcaNombre = marca.nombreMostrar;
             }
-            modelosConNombre.push({
+            resultado.push({
                 _id: modelo._id,
                 nombre: modelo.nombre,
                 categoria: modelo.categoria,
@@ -1019,7 +1019,7 @@ app.get('/api/admin/modelos', verificarAdmin, async (req, res) => {
                 marcaNombre: marcaNombre
             });
         }
-        res.json(modelosConNombre);
+        res.json(resultado);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });

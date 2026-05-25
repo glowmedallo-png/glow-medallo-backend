@@ -668,6 +668,7 @@
         tbody.innerHTML = '';
         modelos.forEach(m => {
             const row = tbody.insertRow();
+            // Columna Marca: usa el campo marcaNombre que viene del backend
             row.insertCell(0).textContent = m.marcaNombre || '?';
             row.insertCell(1).textContent = m.nombre;
             row.insertCell(2).textContent = m.categoria;
@@ -693,14 +694,15 @@
             actionsCell.appendChild(editBtn);
             actionsCell.appendChild(deleteBtn);
         });
-        // Llenar select de marcas para el formulario (si es necesario)
+        // Actualizar el select de marcas para el formulario
         const selectMarca = document.getElementById('modeloMarcaId');
         if (selectMarca && marcasGlobal.length) {
             selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
         }
     } catch (error) {
-        console.error('Error en cargarModelosAdmin:', error);
-        document.querySelector('#modelosTable tbody').innerHTML = '<tr><td colspan="5">Error al cargar modelos</td></tr>';
+        console.error('Error cargando modelos:', error);
+        const tbody = document.querySelector('#modelosTable tbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5">Error al cargar modelos</td></tr>';
     }
 }
     window.mostrarFormModelo = () => {
