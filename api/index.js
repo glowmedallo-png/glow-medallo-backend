@@ -192,7 +192,7 @@ const memoryStorage = multer.memoryStorage();
 const uploadGaleria = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 
 // Las siguientes subidas siguen usando disco (solo funcionarán en entorno local o con persistencia)
-const uploadTecnico = multer({ storage: storageFactory('tecnicos'), limits: { fileSize: 2 * 1024 * 1024 } });
+const uploadTecnico = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 const uploadMarca = multer({ storage: storageFactory('marcas'), limits: { fileSize: 2 * 1024 * 1024 } });
 const uploadModelo = multer({ storage: storageFactory('modelos'), limits: { fileSize: 2 * 1024 * 1024 } });
 
@@ -774,11 +774,15 @@ app.get('/api/admin/stats', verificarAdmin, async (req, res) => {
 // CRUD Técnicos
 app.post('/api/tecnicos', verificarAdmin, async (req, res) => {
     try {
+        // Calcular el próximo id numérico (autoincremental)
+        const ultimoTecnico = await Tecnico.findOne().sort({ id: -1 });
+        const newId = ultimoTecnico ? ultimoTecnico.id + 1 : 1;
         const { nombre, especialidad, experiencia, certificaciones, foto, presentacion } = req.body;
         if (!nombre || !especialidad || !experiencia) {
             return res.status(400).json({ error: 'Faltan datos obligatorios' });
         }
         const nuevo = new Tecnico({
+            id: newId,  
             nombre,
             especialidad,
             experiencia: Number(experiencia),
@@ -811,12 +815,18 @@ app.post('/api/tecnicos/:id/foto', verificarAdmin, uploadTecnico.single('foto'),
         const tecnico = await Tecnico.findById(req.params.id);
         if (!tecnico) return res.status(404).json({ error: 'Técnico no encontrado' });
         if (req.file) {
-            // Eliminar foto anterior si existe
-            if (tecnico.foto) {
-                const oldPath = path.join(__dirname, 'public', tecnico.foto);
-                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-            }
-            tecnico.foto = `/uploads/tecnicos/${req.file.filename}`;
+            // Subir buffer a Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: 'tecnicos' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+            });
+            tecnico.foto = result.secure_url;
             await tecnico.save();
             res.json({ success: true, foto: tecnico.foto });
         } else {
