@@ -159,7 +159,7 @@ app.use(async (req, res, next) => {
     }
 });
 // ========================== MULTER (MULTIPLES DESTINOS) ==========================
-// Función para crear directorios si no existen
+// Función para crear directorios si no existen (para subidas locales)
 const ensureDir = (dir) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 };
@@ -176,7 +176,22 @@ const storageFactory = (subfolder) => multer.diskStorage({
     }
 });
 
-const uploadGaleria = multer({ storage: storageFactory('galeria'), limits: { fileSize: 2 * 1024 * 1024 } });
+// Configuración de Cloudinary (debes agregar las variables de entorno en Vercel)
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const streamifier = require('streamifier');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Usamos memoryStorage para la galería (no se guarda en disco)
+const memoryStorage = multer.memoryStorage();
+const uploadGaleria = multer({ storage: memoryStorage, limits: { fileSize: 2 * 1024 * 1024 } });
+
+// Las siguientes subidas siguen usando disco (solo funcionarán en entorno local o con persistencia)
 const uploadTecnico = multer({ storage: storageFactory('tecnicos'), limits: { fileSize: 2 * 1024 * 1024 } });
 const uploadMarca = multer({ storage: storageFactory('marcas'), limits: { fileSize: 2 * 1024 * 1024 } });
 const uploadModelo = multer({ storage: storageFactory('modelos'), limits: { fileSize: 2 * 1024 * 1024 } });
