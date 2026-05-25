@@ -659,31 +659,32 @@
     };
 
     // ========== MODELOS ==========
-    async function cargarModelosAdmin() {
-        const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
-        const modelos = await res.json();
-        const tbody = document.querySelector('#modelosTable tbody');
-        tbody.innerHTML = modelos.map(m => {
-            const marca = marcasGlobal.find(marca => marca._id === m.marcaId);
-            const nombreMarca = marca ? marca.nombreMostrar : '?';
-            return `
-                <tr>
-                    <td>${nombreMarca}</td>
-                    <td>${escapeHtml(m.nombre)}</td>
-                    <td>${m.categoria}</td>
-                    <td>${m.imagen ? `<img src="${m.imagen}" width="40" style="cursor:pointer" onclick="abrirImagen('${m.imagen}')">` : '📷'}</td>
-                    <td>
-                        <button onclick="editarModelo('${m._id}')">Editar</button>
-                        <button class="danger" onclick="eliminarModelo('${m._id}')">Eliminar</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        const selectMarca = document.getElementById('modeloMarcaId');
-        if (selectMarca && marcasGlobal.length) {
-            selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
-        }
+   async function cargarModelosAdmin() {
+    const res = await fetch(`${API_URL}/admin/modelos`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const modelos = await res.json();
+    const tbody = document.querySelector('#modelosTable tbody');
+    tbody.innerHTML = modelos.map(m => {
+        // Buscar la marca por _id (ObjectId) o por el campo numérico id
+        const marca = marcasGlobal.find(marca => marca._id === m.marcaId || marca.id == m.marcaId);
+        const nombreMarca = marca ? marca.nombreMostrar : '?';
+        return `
+            <tr>
+                <td>${nombreMarca}</td>
+                <td>${escapeHtml(m.nombre)}</td>
+                <td>${m.categoria}</td>
+                <td>${m.imagen ? `<img src="${m.imagen}" width="40" style="cursor:pointer" onclick="abrirImagen('${m.imagen}')">` : '📷'}</td>
+                <td>
+                    <button onclick="editarModelo('${m._id}')">Editar</button>
+                    <button class="danger" onclick="eliminarModelo('${m._id}')">Eliminar</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    const selectMarca = document.getElementById('modeloMarcaId');
+    if (selectMarca && marcasGlobal.length) {
+        selectMarca.innerHTML = marcasGlobal.map(m => `<option value="${m._id}">${m.nombreMostrar}</option>`).join('');
     }
+}
     window.mostrarFormModelo = () => {
         document.getElementById('formModelo').style.display = 'block';
         document.getElementById('modeloId').value = '';
