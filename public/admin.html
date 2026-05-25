@@ -773,7 +773,7 @@ if (selectMarca && marcasGlobal.length) {
    window.guardarModelo = async () => {
     const id = document.getElementById('modeloId').value;
     const nombre = document.getElementById('modeloNombre').value.trim();
-    const marcaId = document.getElementById('modeloMarcaId').value;   // ya no parseInt
+    const marcaId = document.getElementById('modeloMarcaId').value; // string (el _id)
     const categoria = document.getElementById('modeloCategoria').value;
     if (!nombre || !marcaId) return alert('Complete los campos');
     const formData = new FormData();
@@ -798,11 +798,13 @@ if (selectMarca && marcasGlobal.length) {
     document.getElementById('modeloNombre').value = modelo.nombre;
     document.getElementById('modeloCategoria').value = modelo.categoria;
     const select = document.getElementById('modeloMarcaId');
-    // modelo.marcaId debe ser el _id de la marca (string)
-    for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].value === modelo.marcaId) {
-            select.selectedIndex = i;
-            break;
+    // modelo.marcaId debe ser el _id (string). Comparar directamente
+    if (select && modelo.marcaId) {
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === modelo.marcaId) {
+                select.selectedIndex = i;
+                break;
+            }
         }
     }
     document.getElementById('formModelo').style.display = 'block';
