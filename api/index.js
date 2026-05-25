@@ -884,10 +884,17 @@ app.get('/api/admin/marcas', verificarAdmin, async (req, res) => {
 
 app.get('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
     try {
-        const marca = await Marca.findById(req.params.id);
+        const idParam = req.params.id;
+        let marca;
+        if (idParam.match(/^[0-9a-fA-F]{24}$/)) {
+            marca = await Marca.findById(idParam);
+        } else {
+            marca = await Marca.findOne({ id: parseInt(idParam) });
+        }
         if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
         res.json(marca);
     } catch (error) {
+        console.error('Error obteniendo marca:', error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -940,21 +947,24 @@ app.post('/api/admin/marcas', verificarAdmin, uploadMarca.single('imagen'), asyn
 
 app.put('/api/admin/marcas/:id', verificarAdmin, uploadMarca.single('imagen'), async (req, res) => {
     try {
-        const idNumerico = parseInt(req.params.id);
-        const marca = await Marca.findOne({ id: idNumerico });
+        const { nombre, nombreMostrar, activo } = req.body;
+        let marca;
+        // Si el parámetro es un ObjectId válido, buscar por _id, si no, por id numérico
+        const idParam = req.params.id;
+        if (idParam.match(/^[0-9a-fA-F]{24}$/)) {
+            marca = await Marca.findById(idParam);
+        } else {
+            marca = await Marca.findOne({ id: parseInt(idParam) });
+        }
         if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
         if (nombre) marca.nombre = nombre.toLowerCase();
         if (nombreMostrar) marca.nombreMostrar = nombreMostrar;
         if (activo !== undefined) marca.activo = activo === 'true' || activo === true;
         if (req.file) {
-            // Subir nueva imagen a Cloudinary
             const result = await new Promise((resolve, reject) => {
                 const uploadStream = cloudinary.uploader.upload_stream(
                     { folder: 'marcas' },
-                    (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    }
+                    (error, result) => { if (error) reject(error); else resolve(result); }
                 );
                 streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
             });
@@ -963,21 +973,32 @@ app.put('/api/admin/marcas/:id', verificarAdmin, uploadMarca.single('imagen'), a
         await marca.save();
         res.json({ success: true, marca });
     } catch (error) {
+        console.error('Error actualizando marca:', error);
         res.status(500).json({ error: error.message });
     }
 });
 app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
     try {
-        const idNumerico = parseInt(req.params.id);
-        const marca = await Marca.findOne({ id: idNumerico });
-    if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
-        if (marca.imagen) {
-            const imgPath = path.join(__dirname, 'public', marca.imagen);
-            if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+        const idParam = req.params.id;
+        let marca;
+        if (idParam.match(/^[0-9a-fA-F]{24}$/)) {
+            marca = await Marca.findById(idParam);
+        } else {
+            marca = await Marca.findOne({ id: parseInt(idParam) });
         }
-        await Marca.deleteOne({ _id: req.params.id });
-        res.json({ success: true });
+        if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
+
+        // Eliminar imagen de Cloudinary si existe
+        if (marca.imagen) {
+            // Extraer public_id de la URL de Cloudinary (asumiendo formato .../upload/v.../marcas/nombre.jpg)
+            const publicId = marca.imagen.split('/').slice(-2).join('/').split('.')[0];
+            await cloudinary.uploader.destroy(publicId);
+        }
+
+        await Marca.deleteOne({ _id: marca._id });
+        res.json({ success: true, mensaje: 'Marca eliminada' });
     } catch (error) {
+        console.error('Error eliminando marca:', error);
         res.status(500).json({ error: error.message });
     }
 });
