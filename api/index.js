@@ -1061,12 +1061,42 @@ app.post('/api/recomendar-tecnico', async (req, res) => {
 app.post('/api/admin/galeria', verificarAdmin, uploadGaleria.fields([{ name: 'antes' }, { name: 'despues' }]), async (req, res) => {
     try {
         const { titulo, descripcion, categoria } = req.body;
-        const antes = req.files['antes'] ? `/uploads/galeria/${req.files['antes'][0].filename}` : '';
-        const despues = req.files['despues'] ? `/uploads/galeria/${req.files['despues'][0].filename}` : '';
-        const nueva = new Galeria({ titulo, descripcion, categoria, url_antes: antes, url_despues: despues });
+        let antesUrl = '';
+        let despuesUrl = '';
+
+        // Función para subir un buffer a Cloudinary
+        const uploadToCloudinary = (buffer, folder) => {
+            return new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    { folder: folder, upload_preset: 'glow_medallo_galeria' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result.secure_url);
+                    }
+                );
+                streamifier.createReadStream(buffer).pipe(uploadStream);
+            });
+        };
+
+        if (req.files && req.files['antes']) {
+            antesUrl = await uploadToCloudinary(req.files['antes'][0].buffer, 'galeria');
+        }
+        if (req.files && req.files['despues']) {
+            despuesUrl = await uploadToCloudinary(req.files['despues'][0].buffer, 'galeria');
+        }
+
+        const nueva = new Galeria({
+            titulo,
+            descripcion,
+            categoria,
+            url_antes: antesUrl,
+            url_despues: despuesUrl,
+            activo: true
+        });
         await nueva.save();
         res.json({ success: true, imagen: nueva });
     } catch (error) {
+        console.error('Error subiendo a Cloudinary:', error);
         res.status(500).json({ error: error.message });
     }
 });
