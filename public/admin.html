@@ -571,16 +571,31 @@
         cargarGaleria();
     };
 
-    document.getElementById('formGaleria')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const res = await fetch(`${API_URL}/admin/galeria`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-        if (res.ok) { alert('Imagen subida'); cargarGaleria(); e.target.reset(); }
-        else alert('Error');
+   // En tu admin.html, dentro del evento 'submit' del formulario de galería
+document.getElementById('formGaleria')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    // ... (mantén el resto de tu código)
+
+    const res = await fetch(`${API_URL}/admin/galeria`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
     });
+    if (res.ok) {
+        alert('Imagen subida');
+        cargarGaleria();
+        e.target.reset();
+    } else {
+        const errorText = await res.text();
+        alert('Error al subir: ' + errorText);
+    }
+});
 
     // ========== MARCAS ==========
 // ========== MARCAS ==========
+a// ========== MARCAS (CORREGIDO) ==========
 async function cargarMarcasAdmin() {
     try {
         const res = await fetch(`${API_URL}/marcas`);
@@ -590,11 +605,12 @@ async function cargarMarcasAdmin() {
         tbody.innerHTML = ''; // Limpiar
         marcas.forEach(m => {
             const row = tbody.insertRow();
-            row.insertCell(0).textContent = m.id || '-';
-            row.insertCell(1).textContent = m.nombre;
-            row.insertCell(2).textContent = m.nombreMostrar;
-            // Celda de imagen
-            const imgCell = row.insertCell(3);
+            // Columna 0: Nombre mostrar
+            row.insertCell(0).textContent = m.nombreMostrar || '';
+            // Columna 1: Nombre técnico
+            row.insertCell(1).textContent = m.nombre || '';
+            // Columna 2: Imagen
+            const imgCell = row.insertCell(2);
             if (m.imagen) {
                 const img = document.createElement('img');
                 img.src = m.imagen;
@@ -605,11 +621,11 @@ async function cargarMarcasAdmin() {
             } else {
                 imgCell.textContent = '📷';
             }
-            // Celda de acciones
-            const actionsCell = row.insertCell(4);
+            // Columna 3: Acciones
+            const actionsCell = row.insertCell(3);
             const editBtn = document.createElement('button');
             editBtn.textContent = 'Editar';
-            editBtn.onclick = () => editarMarca(m._id); // Pasa el ID directamente
+            editBtn.onclick = () => editarMarca(m._id);
             const deleteBtn = document.createElement('button');
             deleteBtn.textContent = 'Eliminar';
             deleteBtn.className = 'danger';
@@ -617,22 +633,31 @@ async function cargarMarcasAdmin() {
             actionsCell.appendChild(editBtn);
             actionsCell.appendChild(deleteBtn);
         });
+        // Actualizar el encabezado de la tabla (opcional, pero recomendado)
+        const thead = document.querySelector('#marcasTable thead');
+        if (thead) {
+            thead.innerHTML = '<tr><th>Nombre mostrar</th><th>Nombre</th><th>Imagen</th><th>Acciones</th></tr>';
+        }
     } catch (error) {
         console.error('Error cargando marcas:', error);
     }
 }
 
-  window.mostrarFormMarca = () => {
+window.mostrarFormMarca = () => {
     document.getElementById('marcaId').value = '';
     document.getElementById('marcaNombre').value = '';
     document.getElementById('marcaMostrar').value = '';
-    document.getElementById('marcaImagenPreview').style.display = 'none';
+    const preview = document.getElementById('marcaImagenPreview');
+    if (preview) preview.style.display = 'none';
     document.getElementById('formMarca').style.display = 'block';
 };
-    window.cerrarFormMarca = () => { document.getElementById('formMarca').style.display = 'none'; };
-  window.guardarMarca = async () => {
+
+window.cerrarFormMarca = () => {
+    document.getElementById('formMarca').style.display = 'none';
+};
+
+window.guardarMarca = async () => {
     const id = document.getElementById('marcaId').value;
-    console.log("ID:", id);
     const nombre = document.getElementById('marcaNombre').value.trim();
     const nombreMostrar = document.getElementById('marcaMostrar').value.trim();
     if (!nombre || !nombreMostrar) return alert('Complete los campos');
@@ -646,14 +671,13 @@ async function cargarMarcasAdmin() {
     }
     
     let url, method;
-    if (id && id !== '') {
+    if (id && id !== '' && id !== 'undefined') {
         url = `${API_URL}/admin/marcas/${id}`;
         method = 'PUT';
     } else {
         url = `${API_URL}/admin/marcas`;
         method = 'POST';
     }
-    console.log("Enviando a:", method, url);
     
     try {
         const res = await fetch(url, {
@@ -662,19 +686,20 @@ async function cargarMarcasAdmin() {
             body: formData
         });
         if (res.ok) {
-            alert('Marca guardada');
+            alert('Marca guardada correctamente');
             cargarMarcasAdmin();
             cerrarFormMarca();
         } else {
-            const error = await res.text();
-            console.error("Error respuesta:", error);
-            alert('Error: ' + error);
+            const errorText = await res.text();
+            console.error('Error respuesta:', errorText);
+            alert('Error del servidor: ' + errorText);
         }
     } catch (err) {
         console.error(err);
         alert('Error de conexión');
     }
 };
+
 window.editarMarca = (id) => {
     console.log("Editando marca con ID:", id);
     const marca = marcasGlobal.find(m => m._id === id);
@@ -682,10 +707,9 @@ window.editarMarca = (id) => {
         alert('Marca no encontrada');
         return;
     }
-    document.getElementById('marcaId').value = marca._id;  // <-- Aquí se asigna el ID
+    document.getElementById('marcaId').value = marca._id;
     document.getElementById('marcaNombre').value = marca.nombre;
     document.getElementById('marcaMostrar').value = marca.nombreMostrar;
-    // Previsualizar imagen actual
     const preview = document.getElementById('marcaImagenPreview');
     if (preview) {
         if (marca.imagen) {

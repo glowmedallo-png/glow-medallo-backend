@@ -932,8 +932,8 @@ app.post('/api/admin/marcas', verificarAdmin, uploadMarca.single('imagen'), asyn
 
 app.put('/api/admin/marcas/:id', verificarAdmin, uploadMarca.single('imagen'), async (req, res) => {
     try {
-        const { nombre, nombreMostrar, activo } = req.body;
-        const marca = await Marca.findById(req.params.id);
+        const idNumerico = parseInt(req.params.id);
+        const marca = await Marca.findOne({ id: idNumerico });
         if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
         if (nombre) marca.nombre = nombre.toLowerCase();
         if (nombreMostrar) marca.nombreMostrar = nombreMostrar;
@@ -960,8 +960,9 @@ app.put('/api/admin/marcas/:id', verificarAdmin, uploadMarca.single('imagen'), a
 });
 app.delete('/api/admin/marcas/:id', verificarAdmin, async (req, res) => {
     try {
-        const marca = await Marca.findById(req.params.id);
-        if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
+        const idNumerico = parseInt(req.params.id);
+        const marca = await Marca.findOne({ id: idNumerico });
+    if (!marca) return res.status(404).json({ error: 'Marca no encontrada' });
         if (marca.imagen) {
             const imgPath = path.join(__dirname, 'public', marca.imagen);
             if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
