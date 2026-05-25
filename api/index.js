@@ -1164,6 +1164,7 @@ app.get('/api/calificaciones-servicio', async (req, res) => {
 
 let cachedDb = null;
 const connectDB = async () => {
+    console.log('URI real (primeros 50 caracteres):', process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 50) : 'undefined');
     if (cachedDb && mongoose.connection.readyState === 1) return cachedDb;
     console.log('🔄 URI a conectar:', process.env.MONGODB_URI ? 'OK (definida)' : 'NO DEFINIDA');
     try {
